@@ -1,0 +1,1982 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>夢女與夢角 · 字卡傳訊</title>
+<style>
+:root{
+  --bg:#f1f4f0;--panel:#ffffff;--text:#2f332f;--text-sub:#8f968f;
+  --user-bubble:#95ec69;--user-text:#1f2a1a;--dream-bubble:#ffffff;--dream-text:#2f332f;
+  --btn:#4f9a4f;--btn-text:#fff;--input-bg:#eef1ed;--input-text:#2f332f;
+  --avatar-border:#dfe4dd;--typing-bg:#eef1ed;--typing-text:#8f968f;
+  --nav-bg:#f7faf6;--divider:#e4e9e2;--accent:#4f9a4f;
+  --tarot-bg:#e9efe6;--tarot-card:#ffffff;--tarot-accent:#4f9a4f;--tarot-gold:#c9a35c;--tarot-text:#2f332f;
+  --app-font:system-ui,-apple-system,sans-serif;
+  --safe-t:env(safe-area-inset-top,0px);--safe-b:env(safe-area-inset-bottom,0px);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{margin:0;padding:0;height:100%;}
+body{
+  font-family:var(--app-font);
+  background:var(--bg);color:var(--text);overscroll-behavior:none;
+  font-size:15px;line-height:1.45;
+}
+#app{height:100vh;height:100dvh;display:flex;flex-direction:column;overflow:hidden;padding-top:var(--safe-t);padding-bottom:var(--safe-b);}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit;touch-action:manipulation;}
+input,textarea{font-family:inherit;font-size:16px;touch-action:manipulation;}
+input:focus,textarea:focus{outline:none;}
+.hidden{display:none!important;}
+
+/* ===== 导航栏 ===== */
+#nav{
+  height:56px;min-height:56px;display:flex;align-items:center;gap:8px;padding:0 12px;
+  background:var(--nav-bg);border-bottom:1px solid var(--divider);z-index:20;
+}
+#nav .nav-back{width:36px;height:36px;display:flex;align-items:center;justify-content:center;border-radius:50%;flex-shrink:0;}
+#nav .nav-back:active{background:var(--input-bg);}
+#nav .nav-title{font-size:17px;font-weight:600;flex:1;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+#nav .nav-account{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text-sub);max-width:90px;}
+#nav .nav-account span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+#nav .dot{width:8px;height:8px;border-radius:50%;background:#6fbf73;flex-shrink:0;}
+
+/* ===== 页面容器 ===== */
+.page{flex:1;overflow:hidden;display:none;flex-direction:column;position:relative;}
+.page.active{display:flex;}
+
+/* ===== 主页 ===== */
+#homeList{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:10px 12px 90px;}
+.dream-card{
+  display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:14px;
+  background:var(--panel);margin-bottom:10px;position:relative;
+  box-shadow:0 1px 3px rgba(0,0,0,.05);
+}
+.dream-card:active{background:var(--input-bg);}
+.dream-avatar{width:50px;height:50px;border-radius:12px;background:var(--input-bg);border:1px solid var(--avatar-border);overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+.dream-avatar img{width:100%;height:100%;object-fit:cover;}
+.dream-avatar .ph{font-size:20px;color:var(--text-sub);}
+.dream-info{flex:1;min-width:0;}
+.dream-name{font-weight:600;font-size:15px;margin-bottom:2px;}
+.dream-preview{font-size:12.5px;color:var(--text-sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.dream-badge{background:var(--btn);color:var(--btn-text);font-size:11px;border-radius:10px;padding:1px 7px;margin-left:6px;}
+.home-empty{text-align:center;color:var(--text-sub);padding:60px 20px;font-size:14px;}
+
+/* 主页底部按钮区 */
+.home-fab-bar{
+  position:absolute;right:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px));
+  display:flex;gap:12px;align-items:center;z-index:15;
+}
+.fab{
+  width:52px;height:52px;border-radius:50%;background:var(--btn);color:var(--btn-text);
+  display:flex;align-items:center;justify-content:center;box-shadow:0 4px 14px rgba(0,0,0,.18);
+}
+.fab:active{transform:scale(.94);}
+.fab.fab-plain{
+  width:44px;height:44px;background:var(--panel);color:var(--text-sub);
+  box-shadow:0 2px 8px rgba(0,0,0,.10);border:1px solid var(--divider);
+}
+.home-hint{position:absolute;left:12px;bottom:calc(24px + env(safe-area-inset-bottom,0px));font-size:12px;color:var(--text-sub);max-width:60%;}
+
+/* ===== 聊天页 ===== */
+#chatTop{
+  display:flex;align-items:center;gap:8px;padding:8px 14px;background:var(--nav-bg);
+  border-bottom:1px solid var(--divider);
+}
+.top-avatar{width:46px;height:46px;border-radius:50%;overflow:hidden;border:1px solid var(--avatar-border);background:var(--input-bg);flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+.top-avatar img{width:100%;height:100%;object-fit:cover;}
+.top-avatar .ph{font-size:18px;color:var(--text-sub);}
+.top-name{font-size:12px;color:var(--text-sub);max-width:70px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:center;margin-top:2px;}
+.top-col{display:flex;flex-direction:column;align-items:center;flex-shrink:0;cursor:pointer;}
+.top-heart{flex-shrink:0;}
+.func-strip{display:flex;gap:6px;margin-left:auto;align-items:center;flex-shrink:0;}
+.func-btn{
+  width:24px;height:24px;border-radius:50%;background:var(--input-bg);color:var(--btn);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.func-btn:active{transform:scale(.9);}
+.func-btn svg{width:14px;height:14px;}
+
+/* 聊天背景调整：填满、靠下、半透明遮罩 */
+#msgList{
+  flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:12px 12px 8px;
+  background-color: var(--bg);
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center bottom;
+  background-blend-mode: multiply;
+  background-image: linear-gradient(rgba(255,255,255,0.85), rgba(255,255,255,0.85));
+}
+body.is-dark-bg #msgList {
+  background-image: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7));
+}
+
+.day-divider{text-align:center;color:var(--text-sub);font-size:11.5px;margin:14px 0 10px;}
+.sys-msg{text-align:center;margin:10px 0;}
+.sys-msg span{display:inline-block;background:rgba(128,128,128,.14);color:var(--text-sub);font-size:12px;padding:4px 12px;border-radius:12px;}
+
+.msg-row{display:flex;align-items:flex-start;gap:8px;margin-bottom:12px;}
+.msg-row.user{flex-direction:row-reverse;}
+.msg-avatar{width:34px;height:34px;border-radius:50%;overflow:hidden;background:var(--input-bg);border:1px solid var(--avatar-border);flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+.msg-avatar img{width:100%;height:100%;object-fit:cover;}
+.msg-avatar .ph{font-size:15px;color:var(--text-sub);}
+.msg-body{max-width:72%;display:flex;flex-direction:column;}
+.msg-row.user .msg-body{align-items:flex-end;}
+.msg-meta{font-size:11px;color:var(--text-sub);margin-bottom:3px;display:flex;gap:6px;align-items:center;}
+.msg-row.user .msg-meta{flex-direction:row-reverse;}
+.bubble{
+  position:relative;padding:8px 12px;border-radius:14px;font-size:14.5px;word-break:break-word;
+  white-space:pre-wrap;line-height:1.5;
+}
+.msg-row.dream .bubble{background:var(--dream-bubble);color:var(--dream-text);border-top-left-radius:4px;}
+.msg-row.user .bubble{background:var(--user-bubble);color:var(--user-text);border-top-right-radius:4px;}
+/* 气泡形状 */
+body.shape-tail .msg-row.dream .bubble::after{content:"";position:absolute;left:-6px;top:8px;width:0;height:0;border-top:6px solid transparent;border-bottom:0 solid transparent;border-right:7px solid var(--dream-bubble);z-index:-1;}
+body.shape-tail .msg-row.user .bubble::after{content:"";position:absolute;right:-6px;top:8px;width:0;height:0;border-top:6px solid transparent;border-left:7px solid var(--user-bubble);z-index:-1;}
+body.shape-round .bubble{border-radius:18px!important;}
+body.shape-capsule .bubble{border-radius:22px!important;}
+body.shape-rect .bubble{border-radius:6px!important;}
+.star-deco{position:absolute;top:-7px;right:-5px;width:14px;height:14px;color:var(--accent);}
+.quote-block{border-left:3px solid var(--accent);padding:4px 8px;margin-bottom:5px;font-size:12.5px;color:var(--text-sub);background:rgba(128,128,128,.08);border-radius:4px;}
+.msg-img{max-width:180px;max-height:180px;border-radius:10px;display:block;}
+.msg-sticker{width:110px;height:110px;object-fit:contain;display:block;}
+.msg-status{font-size:10.5px;color:var(--text-sub);margin-top:3px;}
+
+/* 拼接标签 */
+.concat-badge {
+  display:inline-block; font-size:10px; color:var(--text-sub); margin-top:4px;
+  background: rgba(128,128,128,.08); padding: 1px 6px; border-radius: 6px;
+}
+
+/* 打字提示 */
+.typing-row{display:flex;align-items:flex-start;gap:8px;margin-bottom:12px;}
+.typing-box{background:var(--typing-bg);color:var(--typing-text);padding:9px 14px;border-radius:14px;border-top-left-radius:4px;font-size:13.5px;display:flex;align-items:center;gap:6px;}
+.typing-dots span{display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--typing-text);margin:0 1px;animation:blink 1.2s infinite;}
+.typing-dots span:nth-child(2){animation-delay:.2s;}
+.typing-dots span:nth-child(3){animation-delay:.4s;}
+@keyframes blink{0%,80%,100%{opacity:.25;}40%{opacity:1;}}
+
+/* 问卷卡片 */
+.survey-card{background:var(--panel);border:1px solid var(--divider);border-radius:14px;padding:12px;min-width:200px;max-width:260px;}
+.survey-title{font-weight:600;font-size:14px;margin-bottom:8px;}
+.survey-opt{padding:7px 10px;border-radius:9px;background:var(--input-bg);margin-bottom:6px;font-size:13.5px;}
+.survey-opt.picked{background:var(--user-bubble);color:var(--user-text);font-weight:600;}
+.survey-result{font-size:12px;color:var(--accent);margin-top:4px;}
+
+/* 输入区 */
+#inputBar{
+  display:flex;align-items:flex-end;gap:6px;padding:8px 10px calc(8px + env(safe-area-inset-bottom,0px));
+  background:var(--nav-bg);border-top:1px solid var(--divider);
+}
+.ib-btn{width:38px;height:38px;border-radius:50%;background:var(--input-bg);color:var(--btn);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.ib-btn:active{transform:scale(.92);}
+.ib-btn svg{width:20px;height:20px;}
+#msgInput{
+  flex:1;min-height:38px;max-height:110px;border-radius:19px;background:var(--input-bg);color:var(--input-text);
+  border:none;padding:9px 14px;resize:none;font-size:16px;line-height:1.4;
+}
+#sendBtn{width:38px;height:38px;border-radius:50%;background:var(--btn);color:var(--btn-text);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+#sendBtn svg{width:20px;height:20px;}
+#quotePreview{display:flex;align-items:center;gap:8px;padding:6px 14px;background:var(--input-bg);font-size:12.5px;color:var(--text-sub);border-top:1px solid var(--divider);}
+#quotePreview .qp-text{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+
+/* ===== 字卡库 ===== */
+#libTabs{display:flex;background:var(--nav-bg);border-bottom:1px solid var(--divider);padding:0 8px;}
+.lib-tab{flex:1;padding:12px 0;text-align:center;font-size:14px;color:var(--text-sub);border-bottom:2px solid transparent;}
+.lib-tab.active{color:var(--text);border-bottom-color:var(--btn);font-weight:600;}
+#libBody{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:12px;padding-bottom:40px;}
+.lib-toolbar{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;align-items:center;}
+.lib-btn{padding:6px 12px;border-radius:9px;background:var(--input-bg);color:var(--text);font-size:13px;}
+.lib-btn:active{opacity:.7;}
+.lib-btn.primary{background:var(--btn);color:var(--btn-text);}
+.lib-count{font-size:12px;color:var(--text-sub);margin-left:auto;}
+.lib-item{display:flex;align-items:center;gap:10px;padding:9px 10px;background:var(--panel);border-radius:10px;margin-bottom:6px;}
+.lib-item .li-text{flex:1;font-size:14px;word-break:break-word;}
+.lib-item input[type=checkbox]{width:18px;height:18px;accent-color:var(--btn);}
+.lib-del{width:26px;height:26px;border-radius:50%;background:var(--input-bg);color:var(--text-sub);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
+.lib-thumb{width:44px;height:44px;border-radius:8px;object-fit:cover;background:var(--input-bg);}
+.lib-empty{text-align:center;color:var(--text-sub);padding:40px;font-size:13.5px;}
+.setting-row{display:flex;align-items:center;justify-content:space-between;padding:12px 4px;border-bottom:1px solid var(--divider);gap:12px;}
+.setting-label{font-size:14px;}
+.setting-sub{font-size:11.5px;color:var(--text-sub);margin-top:2px;}
+.switch{width:46px;height:26px;border-radius:13px;background:var(--input-bg);position:relative;transition:.2s;flex-shrink:0;border:1px solid var(--divider);}
+.switch.on{background:var(--btn);border-color:var(--btn);}
+.switch::after{content:"";position:absolute;left:2px;top:2px;width:20px;height:20px;border-radius:50%;background:#fff;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.2);}
+.switch.on::after{left:22px;}
+.setting-num{width:66px;padding:6px 8px;border-radius:8px;border:1px solid var(--divider);background:var(--input-bg);color:var(--input-text);text-align:center;font-size:16px;}
+.setting-slider{flex:1;accent-color:var(--btn);}
+.setting-val{font-size:13px;color:var(--text-sub);min-width:44px;text-align:right;}
+
+/* 默认字卡区块 */
+.default-card-block{
+  background:var(--panel);border:1px solid var(--divider);border-radius:14px;
+  padding:12px;margin-bottom:14px;
+}
+.default-card-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px;}
+.default-card-title{font-weight:600;font-size:14.5px;display:flex;align-items:center;gap:8px;}
+.default-card-badge{background:var(--btn);color:var(--btn-text);font-size:11px;border-radius:9px;padding:1px 8px;}
+.default-card-sub{font-size:12px;color:var(--text-sub);margin-bottom:10px;line-height:1.5;}
+.default-card-tools{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;}
+.default-card-list{max-height:260px;overflow-y:auto;-webkit-overflow-scrolling:touch;border-top:1px solid var(--divider);}
+.default-card-item{padding:7px 4px;font-size:13.5px;color:var(--text-sub);border-bottom:1px solid var(--divider);}
+.default-card-item:last-child{border-bottom:none;}
+.default-card-more{text-align:center;padding:10px;font-size:13px;color:var(--btn);}
+
+/* ===== 弹窗 ===== */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.42);z-index:100;display:flex;align-items:center;justify-content:center;padding:20px;animation:fadeIn .15s;}
+@keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+.modal{background:var(--panel);color:var(--text);border-radius:18px;width:100%;max-width:420px;max-height:86vh;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:18px;animation:pop .18s;}
+@keyframes pop{from{transform:scale(.94);opacity:0;}to{transform:scale(1);opacity:1;}}
+.modal h3{margin:0 0 14px;font-size:17px;}
+.modal-actions{display:flex;gap:10px;margin-top:16px;}
+.modal-actions button{flex:1;padding:11px;border-radius:11px;font-size:15px;background:var(--input-bg);color:var(--text);}
+.modal-actions button.primary{background:var(--btn);color:var(--btn-text);}
+.modal-input{width:100%;padding:11px 13px;border-radius:11px;border:1px solid var(--divider);background:var(--input-bg);color:var(--input-text);margin-bottom:10px;}
+.modal-label{font-size:13px;color:var(--text-sub);margin:10px 0 6px;}
+.profile-avatar-edit{width:84px;height:84px;border-radius:50%;margin:0 auto 14px;background:var(--input-bg);border:1px solid var(--avatar-border);overflow:hidden;display:flex;align-items:center;justify-content:center;position:relative;}
+.profile-avatar-edit img{width:100%;height:100%;object-fit:cover;}
+.profile-avatar-edit .ph{font-size:30px;color:var(--text-sub);}
+.avatar-hint{text-align:center;font-size:12px;color:var(--text-sub);margin-bottom:12px;}
+
+/* 主题网格 */
+.theme-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px;}
+.theme-swatch{border-radius:12px;padding:10px 6px;text-align:center;font-size:12px;border:2px solid transparent;cursor:pointer;}
+.theme-swatch.active{border-color:var(--btn);}
+.theme-dot{width:30px;height:30px;border-radius:50%;margin:0 auto 6px;border:1px solid rgba(0,0,0,.1);}
+.color-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;}
+.color-row input[type=color]{width:44px;height:30px;border:none;background:none;padding:0;}
+.shape-row{display:flex;gap:8px;flex-wrap:wrap;}
+.shape-opt{padding:8px 14px;border-radius:10px;background:var(--input-bg);font-size:13px;border:2px solid transparent;}
+.shape-opt.active{border-color:var(--btn);}
+
+/* 字体选择 */
+.font-row{display:flex;flex-wrap:wrap;gap:8px;}
+.font-opt{padding:9px 14px;border-radius:10px;background:var(--input-bg);font-size:13.5px;border:2px solid transparent;line-height:1.3;}
+.font-opt.active{border-color:var(--btn);}
+.font-opt .fo-sample{display:block;font-size:11px;color:var(--text-sub);margin-top:2px;}
+
+/* 表情选择器 */
+.sticker-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
+.sticker-grid img{width:100%;aspect-ratio:1;object-fit:contain;background:var(--input-bg);border-radius:10px;padding:4px;}
+
+/* 塔罗 */
+#tarotLayer{position:fixed;inset:0;z-index:200;background:var(--tarot-bg);color:var(--tarot-text);display:flex;flex-direction:column;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:calc(20px + env(safe-area-inset-top,0px)) 20px calc(20px + env(safe-area-inset-bottom,0px));}
+.tarot-close{position:absolute;top:calc(14px + env(safe-area-inset-top,0px));right:16px;width:34px;height:34px;border-radius:50%;background:rgba(128,128,128,.15);display:flex;align-items:center;justify-content:center;z-index:5;}
+.tarot-title{text-align:center;font-size:20px;font-weight:700;color:var(--tarot-accent);margin:16px 0 6px;}
+.tarot-sub{text-align:center;font-size:13px;color:var(--tarot-text);opacity:.7;margin-bottom:20px;}
+.tarot-opts{display:flex;gap:12px;justify-content:center;margin-bottom:18px;}
+.tarot-opt{padding:12px 20px;border-radius:12px;background:var(--tarot-card);border:2px solid transparent;font-size:14px;color:var(--tarot-text);}
+.tarot-opt.active{border-color:var(--tarot-gold);}
+.tarot-input{width:100%;max-width:340px;margin:0 auto 18px;display:block;padding:12px;border-radius:12px;border:1px solid var(--tarot-gold);background:var(--tarot-card);color:var(--tarot-text);}
+.tarot-btn{display:block;margin:0 auto;padding:13px 34px;border-radius:14px;background:var(--tarot-accent);color:#fff;font-size:15px;font-weight:600;}
+.tarot-cards{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-top:20px;}
+.tarot-card-wrap{perspective:800px;width:110px;height:170px;cursor:pointer;}
+.tarot-card-inner{position:relative;width:100%;height:100%;transition:transform .7s;transform-style:preserve-3d;}
+.tarot-card-wrap.flipped .tarot-card-inner{transform:rotateY(180deg);}
+.tarot-face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:10px;display:flex;align-items:center;justify-content:center;overflow:hidden;}
+.tarot-back{background:linear-gradient(135deg,var(--tarot-accent),var(--tarot-gold));border:2px solid var(--tarot-gold);}
+.tarot-front{background:var(--tarot-card);border:2px solid var(--tarot-gold);transform:rotateY(180deg);flex-direction:column;padding:6px;text-align:center;}
+.tarot-front svg{width:60px;height:60px;}
+.tarot-front .tn{font-size:11px;font-weight:700;color:var(--tarot-text);margin-top:4px;}
+.tarot-front .tr{font-size:10px;color:var(--tarot-accent);}
+.tarot-results{margin-top:20px;}
+.tarot-result-item{background:var(--tarot-card);border-radius:14px;padding:14px;margin-bottom:12px;border:1px solid var(--tarot-gold);}
+.tarot-result-item .rt{font-weight:700;color:var(--tarot-accent);font-size:15px;}
+.tarot-result-item .rp{font-size:12px;color:var(--tarot-gold);margin-bottom:6px;}
+.tarot-result-item .rd{font-size:13px;line-height:1.6;color:var(--tarot-text);}
+
+/* 通话层 */
+#callLayer{position:fixed;inset:0;z-index:210;background:linear-gradient(160deg,#2a2a35,#1a1a22);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:30px;}
+#callLayer .call-avatar{width:110px;height:110px;border-radius:50%;overflow:hidden;border:3px solid rgba(255,255,255,.3);margin-bottom:18px;display:flex;align-items:center;justify-content:center;background:#3a3a48;}
+#callLayer .call-avatar img{width:100%;height:100%;object-fit:cover;}
+#callLayer .call-name{font-size:20px;font-weight:600;margin-bottom:8px;}
+#callLayer .call-status{font-size:14px;opacity:.7;margin-bottom:30px;}
+.call-btns{display:flex;gap:24px;flex-wrap:wrap;justify-content:center;}
+.call-btn{width:60px;height:60px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;color:#fff;flex-direction:column;gap:2px;}
+.call-btn.hang{background:#e05555;}
+.call-btn.mute{background:rgba(255,255,255,.18);}
+.call-btn.mini{background:rgba(255,255,255,.18);}
+
+/* 通话小窗：正方形（微信风格） */
+#callMini{
+  position:fixed;z-index:211;
+  width:72px;height:72px;
+  border-radius:12px;
+  background:#2a2a35;color:#fff;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 4px 16px rgba(0,0,0,.35);
+  touch-action:none;cursor:grab;
+  border:2px solid rgba(255,255,255,.28);
+}
+#callMini:active{cursor:grabbing;}
+#callMini .cm-timer{
+  position:absolute;bottom:-20px;left:50%;transform:translateX(-50%);
+  white-space:nowrap;color:#fff;background:rgba(0,0,0,.55);
+  padding:1px 7px;border-radius:6px;font-size:10px;
+}
+
+/* 信件 */
+#letterDetail .letter-paper{background:var(--panel);border-radius:10px;padding:18px 16px 18px 30px;position:relative;margin-bottom:14px;box-shadow:0 1px 4px rgba(0,0,0,.06);}
+#letterDetail .letter-paper::before{content:"";position:absolute;left:16px;top:0;bottom:0;width:1px;background:var(--accent);opacity:.45;}
+.letter-lines{background-image:repeating-linear-gradient(transparent,transparent 27px,var(--divider) 27px,var(--divider) 28px);line-height:28px;font-size:14px;white-space:pre-wrap;word-break:break-word;min-height:60px;}
+.letter-stamp{position:absolute;top:10px;right:12px;width:44px;height:52px;border:1.5px dashed var(--accent);border-radius:3px;display:flex;align-items:center;justify-content:center;color:var(--accent);font-size:9px;transform:rotate(6deg);opacity:.8;}
+.letter-head{font-size:12px;color:var(--text-sub);margin-bottom:10px;}
+.letter-status-badge{display:inline-block;font-size:11px;padding:2px 9px;border-radius:9px;background:var(--input-bg);color:var(--text-sub);margin-top:8px;}
+.letter-item{background:var(--panel);border-radius:12px;padding:12px;margin-bottom:10px;box-shadow:0 1px 3px rgba(0,0,0,.05);}
+.letter-item .li-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;}
+.letter-item .li-title{font-weight:600;font-size:14px;}
+.letter-item .li-preview{font-size:12.5px;color:var(--text-sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.letter-unread-dot{width:8px;height:8px;border-radius:50%;background:var(--accent);flex-shrink:0;}
+#letterToast{position:fixed;top:calc(10px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);z-index:300;background:var(--btn);color:var(--btn-text);padding:10px 18px;border-radius:14px;font-size:13.5px;box-shadow:0 4px 16px rgba(0,0,0,.2);animation:slideDown .3s;}
+@keyframes slideDown{from{transform:translate(-50%,-20px);opacity:0;}to{transform:translate(-50%,0);opacity:1;}}
+
+/* 长按菜单 */
+#ctxMenu{position:fixed;z-index:250;background:var(--panel);border-radius:12px;box-shadow:0 6px 24px rgba(0,0,0,.2);overflow:hidden;min-width:130px;animation:pop .12s;}
+#ctxMenu button{display:flex;align-items:center;gap:9px;width:100%;padding:11px 16px;font-size:14px;text-align:left;color:var(--text);}
+#ctxMenu button:active{background:var(--input-bg);}
+
+/* 拍一拍面板 */
+#patPanel{position:fixed;left:0;right:0;bottom:0;z-index:220;background:var(--panel);border-top-left-radius:18px;border-top-right-radius:18px;padding:14px 14px calc(14px + env(safe-area-inset-bottom,0px));box-shadow:0 -4px 24px rgba(0,0,0,.18);animation:slideUp .2s;}
+@keyframes slideUp{from{transform:translateY(100%);}to{transform:translateY(0);}}
+#patPanel .pat-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+#patPanel .pat-title{font-weight:600;font-size:15px;}
+#patPanel .pat-close{width:30px;height:30px;border-radius:50%;background:var(--input-bg);color:var(--text-sub);display:flex;align-items:center;justify-content:center;}
+.pat-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;max-height:52vh;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+.pat-item{position:relative;padding:10px 12px;padding-right:32px;border-radius:11px;background:var(--input-bg);font-size:13.5px;line-height:1.35;text-align:left;}
+.pat-item:active{opacity:.75;}
+.pat-item .pat-del{position:absolute;right:6px;top:50%;transform:translateY(-50%);width:22px;height:22px;border-radius:50%;background:var(--panel);color:var(--text-sub);display:flex;align-items:center;justify-content:center;font-size:12px;}
+.pat-add{grid-column:1 / -1;padding:11px;border-radius:11px;border:1px dashed var(--divider);color:var(--text-sub);font-size:13.5px;text-align:center;background:transparent;}
+
+/* 响应式 */
+@media(max-width:520px){
+  .top-avatar{width:42px;height:42px;}
+  .top-heart{width:48px;}
+  .func-btn{width:22px;height:22px;}
+  .func-btn svg{width:13px;height:13px;}
+  .func-strip{gap:4px;}
+  .top-name{max-width:52px;}
+}
+</style>
+</head>
+<body class="shape-tail">
+<div id="app">
+  <!-- 导航 -->
+  <div id="nav">
+    <button class="nav-back hidden" id="navBack" onclick="goBack()" aria-label="返回">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+    </button>
+    <div class="nav-title" id="navTitle">聊天室</div>
+    <div class="nav-account"><span id="navAccountName">訪客</span><div class="dot"></div></div>
+  </div>
+
+  <!-- 主页 -->
+  <div class="page active" id="pageHome">
+    <div id="homeList"></div>
+    <div class="home-hint" id="homeHint"></div>
+    <div class="home-fab-bar">
+      <button class="fab fab-plain" id="profileBtn" title="個人資料" onclick="openProfile()">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+      </button>
+      <button class="fab fab-plain" id="letterBtn" title="寫信" onclick="openWriteLetter()">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><polyline points="3 7 12 13 21 7"/></svg>
+      </button>
+      <button class="fab fab-plain" id="inboxBtn" title="收件匣" onclick="openInbox()" style="position:relative;">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v12H8l-4 4z"/><line x1="8" y1="9" x2="16" y2="9"/><line x1="8" y1="12" x2="13" y2="12"/></svg>
+        <span id="inboxBadge" class="hidden" style="position:absolute;top:-3px;right:-3px;min-width:18px;height:18px;border-radius:9px;background:var(--accent);color:#fff;font-size:11px;display:flex;align-items:center;justify-content:center;padding:0 4px;"></span>
+      </button>
+      <button class="fab" id="addDreamBtn" title="新增夢角" onclick="openAddDream()">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- 聊天页 -->
+  <div class="page" id="pageChat">
+    <div id="chatTop">
+      <div class="top-col" onclick="openEditDream()">
+        <div class="top-avatar" id="topDreamAvatar"><span class="ph">?</span></div>
+        <div class="top-name" id="topDreamName">夢角</div>
+      </div>
+      <svg class="top-heart" width="56" height="46" viewBox="0 0 56 46" fill="none" stroke="#c98b8b" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="0 23 10 23 15 10 21 36 27 18 31 23 56 23"/>
+      </svg>
+      <div class="top-col" onclick="openProfile()">
+        <div class="top-avatar" id="topUserAvatar"><span class="ph">我</span></div>
+        <div class="top-name" id="topUserName">我</div>
+      </div>
+      <div class="func-strip">
+        <button class="func-btn" title="塔羅" onclick="openTarot()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="3" width="12" height="18" rx="2"/><circle cx="12" cy="12" r="2"/></svg></button>
+        <button class="func-btn" title="主題與氣泡" onclick="openTheme()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="13" height="13" rx="2"/><rect x="8" y="8" width="13" height="13" rx="2"/></svg></button>
+        <button class="func-btn" title="字卡庫" onclick="openLib()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M19.1 4.9L17 7M7 17l-2.1 2.1"/></svg></button>
+        <button class="func-btn" title="資料管理" onclick="openDataManage()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-7-4.5-7-10a4 4 0 0 1 7-2.5A4 4 0 0 1 19 11c0 5.5-7 10-7 10z"/></svg></button>
+        <button class="func-btn" title="問卷" onclick="openSurveyBuilder()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 3h9l4 4v14H6z"/><line x1="9" y1="11" x2="16" y2="11"/><line x1="9" y1="15" x2="14" y2="15"/></svg></button>
+      </div>
+    </div>
+    <div id="msgList"></div>
+    <div id="quotePreview" class="hidden">
+      <span id="qpText" class="qp-text"></span>
+      <button onclick="cancelQuote()" style="width:22px;height:22px;border-radius:50%;background:var(--panel);color:var(--text-sub);display:flex;align-items:center;justify-content:center;">✕</button>
+    </div>
+    <div id="inputBar">
+      <button class="ib-btn" title="拍一拍" onclick="openPatPanel()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11V4a1.5 1.5 0 0 1 3 0v6"/><path d="M12 10V3a1.5 1.5 0 0 1 3 0v7"/><path d="M15 10V5a1.5 1.5 0 0 1 3 0v9a6 6 0 0 1-6 6h-1a7 7 0 0 1-7-7v-3a1.5 1.5 0 0 1 3 0v2"/><path d="M9 10V7a1.5 1.5 0 0 0-3 0v7"/></svg></button>
+      <button class="ib-btn" title="讓夢角繼續" onclick="nudgeDream()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg></button>
+      <button class="ib-btn" title="發圖片" onclick="pickChatImage()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+      <button class="ib-btn" title="發起通話" onclick="startCall()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 4h4l2 5-3 2a13 13 0 0 0 5 5l2-3 5 2v4a2 2 0 0 1-2 2A17 17 0 0 1 3 6a2 2 0 0 1 2-2z"/></svg></button>
+      <button class="ib-btn" title="表情包" onclick="openStickerPicker()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg></button>
+      <textarea id="msgInput" rows="1" placeholder="輸入訊息..."></textarea>
+      <button id="sendBtn" onclick="sendText()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button>
+    </div>
+  </div>
+
+  <!-- 字卡库页 -->
+  <div class="page" id="pageLib">
+    <div id="libTabs">
+      <div class="lib-tab active" onclick="switchLibTab('cards')">字卡</div>
+      <div class="lib-tab" onclick="switchLibTab('kaomoji')">顏文字</div>
+      <div class="lib-tab" onclick="switchLibTab('stickers')">表情包</div>
+      <div class="lib-tab" onclick="switchLibTab('settings')">聊天設定</div>
+    </div>
+    <div id="libBody"></div>
+  </div>
+</div>
+
+<div id="modalRoot"></div>
+<div id="tarotRoot"></div>
+<div id="callRoot"></div>
+<div id="toastRoot"></div>
+
+<input type="file" id="hiddenFile" class="hidden">
+
+<script>
+/* ================= 常量与状态 ================= */
+const ACCOUNT = '__guest__';
+const K_DREAMS = `dream_chat_dreams_${ACCOUNT}`;
+const K_PROFILE = `dream_chat_profile_${ACCOUNT}`;
+const K_LETTERS = `dream_chat_letters_${ACCOUNT}`;
+const K_INITED = `dream_chat_inited_${ACCOUNT}`;
+const dataKey = id => `dream_chat_data_${ACCOUNT}::${id}`;
+const IDB_NAME = 'dream_chat_images', IDB_STORE = 'images';
+const idbKey = (dreamId, imageKey) => `${ACCOUNT}::${dreamId}::${imageKey}`;
+const PROFILE_AVATAR_KEY = idbKey('__profile__', 'avatar');
+
+const DEFAULT_PAT_CARDS = [
+  '拍了拍你的頭','拍了拍你的肩膀','輕輕拍了拍你','拍了拍你的臉頰','戳了戳你','拍了拍你的背','抱了抱你'
+];
+
+const THEMES = [
+  {id:'wechat',name:'淺綠色',vars:{'--bg':'#f1f4f0','--panel':'#ffffff','--text':'#2f332f','--text-sub':'#8f968f','--user-bubble':'#95ec69','--user-text':'#1f2a1a','--dream-bubble':'#ffffff','--dream-text':'#2f332f','--btn':'#4f9a4f','--btn-text':'#fff','--input-bg':'#eef1ed','--input-text':'#2f332f','--avatar-border':'#dfe4dd','--typing-bg':'#eef1ed','--typing-text':'#8f968f','--nav-bg':'#f7faf6','--divider':'#e4e9e2','--accent':'#4f9a4f','--tarot-bg':'#e9efe6','--tarot-card':'#ffffff','--tarot-accent':'#4f9a4f','--tarot-gold':'#c9a35c','--tarot-text':'#2f332f'}},
+  {id:'deepgreen',name:'深綠色',vars:{'--bg':'#1d2b22','--panel':'#263829','--text':'#dce8dc','--text-sub':'#8aa08a','--user-bubble':'#3f6b47','--user-text':'#eef6ee','--dream-bubble':'#2c3f2f','--dream-text':'#dce8dc','--btn':'#5c9a63','--btn-text':'#fff','--input-bg':'#2c3f2f','--input-text':'#dce8dc','--avatar-border':'#3a5040','--typing-bg':'#2c3f2f','--typing-text':'#8aa08a','--nav-bg':'#223126','--divider':'#35473a','--accent':'#6fbf73','--tarot-bg':'#1a2620','--tarot-card':'#263829','--tarot-accent':'#5c9a63','--tarot-gold':'#c9a35c','--tarot-text':'#dce8dc'}},
+  {id:'matcha',name:'抹茶綠色',vars:{'--bg':'#f2f5ea','--panel':'#ffffff','--text':'#33402e','--text-sub':'#8a9683','--user-bubble':'#c5d9a8','--user-text':'#2f3a28','--dream-bubble':'#ffffff','--dream-text':'#33402e','--btn':'#7a9a5e','--btn-text':'#fff','--input-bg':'#e8eddd','--input-text':'#33402e','--avatar-border':'#d5dfc8','--typing-bg':'#e8eddd','--typing-text':'#8a9683','--nav-bg':'#fbfcf7','--divider':'#dde5d2','--accent':'#7a9a5e','--tarot-bg':'#eaf0e0','--tarot-card':'#fbfcf7','--tarot-accent':'#7a9a5e','--tarot-gold':'#a8894e','--tarot-text':'#33402e'}},
+  {id:'pink',name:'淡粉紅色',vars:{'--bg':'#fdf0f2','--panel':'#ffffff','--text':'#4a3238','--text-sub':'#a88890','--user-bubble':'#f5c4cc','--user-text':'#5a2f38','--dream-bubble':'#ffffff','--dream-text':'#4a3238','--btn':'#d98a9a','--btn-text':'#fff','--input-bg':'#f8e2e6','--input-text':'#4a3238','--avatar-border':'#edd5da','--typing-bg':'#f8e2e6','--typing-text':'#a88890','--nav-bg':'#fff8f9','--divider':'#f0dde0','--accent':'#d98a9a','--tarot-bg':'#fbe8ec','--tarot-card':'#fff8f9','--tarot-accent':'#d98a9a','--tarot-gold':'#c9a35c','--tarot-text':'#4a3238'}},
+  {id:'sunset',name:'夕陽橙黃色',vars:{'--bg':'#fdf3e6','--panel':'#ffffff','--text':'#4a3a28','--text-sub':'#a89078','--user-bubble':'#f5d4a0','--user-text':'#4a3418','--dream-bubble':'#ffffff','--dream-text':'#4a3a28','--btn':'#d9954a','--btn-text':'#fff','--input-bg':'#f8e8d0','--input-text':'#4a3a28','--avatar-border':'#eddcc5','--typing-bg':'#f8e8d0','--typing-text':'#a89078','--nav-bg':'#fffaf2','--divider':'#f0e2cc','--accent':'#d9954a','--tarot-bg':'#f7e6cc','--tarot-card':'#fffaf2','--tarot-accent':'#d9954a','--tarot-gold':'#b88a4a','--tarot-text':'#4a3a28'}},
+  {id:'deepsea',name:'深海色',vars:{'--bg':'#1a2632','--panel':'#22303e','--text':'#d8e4ec','--text-sub':'#7a8e9e','--user-bubble':'#2f5a6e','--user-text':'#e0f0f8','--dream-bubble':'#2a3846','--dream-text':'#d8e4ec','--btn':'#4a8aa8','--btn-text':'#fff','--input-bg':'#2a3846','--input-text':'#d8e4ec','--avatar-border':'#35485a','--typing-bg':'#2a3846','--typing-text':'#7a8e9e','--nav-bg':'#1e2a36','--divider':'#2e4050','--accent':'#4a8aa8','--tarot-bg':'#16202a','--tarot-card':'#22303e','--tarot-accent':'#4a8aa8','--tarot-gold':'#c9a35c','--tarot-text':'#d8e4ec'}},
+  {id:'purple',name:'淡紫色',vars:{'--bg':'#f4f0fa','--panel':'#ffffff','--text':'#3a3248','--text-sub':'#948aa8','--user-bubble':'#d8c8f0','--user-text':'#3a2f5a','--dream-bubble':'#ffffff','--dream-text':'#3a3248','--btn':'#9a7ac8','--btn-text':'#fff','--input-bg':'#e8e0f5','--input-text':'#3a3248','--avatar-border':'#ddd5ec','--typing-bg':'#e8e0f5','--typing-text':'#948aa8','--nav-bg':'#fbf9ff','--divider':'#e4dcf0','--accent':'#9a7ac8','--tarot-bg':'#ede6f8','--tarot-card':'#fbf9ff','--tarot-accent':'#9a7ac8','--tarot-gold':'#c9a35c','--tarot-text':'#3a3248'}},
+  {id:'liquor',name:'烈酒紅色',vars:{'--bg':'#2a1518','--panel':'#3a1e22','--text':'#f0dcd8','--text-sub':'#a88080','--user-bubble':'#6e2a32','--user-text':'#f8e8e4','--dream-bubble':'#3e2024','--dream-text':'#f0dcd8','--btn':'#b84a52','--btn-text':'#fff','--input-bg':'#3e2024','--input-text':'#f0dcd8','--avatar-border':'#4e2a2e','--typing-bg':'#3e2024','--typing-text':'#a88080','--nav-bg':'#321a1e','--divider':'#4a262a','--accent':'#b84a52','--tarot-bg':'#241214','--tarot-card':'#3a1e22','--tarot-accent':'#b84a52','--tarot-gold':'#c9a35c','--tarot-text':'#f0dcd8'}},
+  {id:'glass',name:'朦朧玻璃色',vars:{'--bg':'#e8ecf0','--panel':'rgba(255,255,255,.75)','--text':'#3a4248','--text-sub':'#8a949a','--user-bubble':'rgba(160,200,220,.7)','--user-text':'#2a3840','--dream-bubble':'rgba(255,255,255,.8)','--dream-text':'#3a4248','--btn':'#7a9ab0','--btn-text':'#fff','--input-bg':'rgba(255,255,255,.6)','--input-text':'#3a4248','--avatar-border':'rgba(200,210,220,.8)','--typing-bg':'rgba(255,255,255,.6)','--typing-text':'#8a949a','--nav-bg':'rgba(255,255,255,.85)','--divider':'rgba(200,210,220,.6)','--accent':'#7a9ab0','--tarot-bg':'#dfe6ec','--tarot-card':'rgba(255,255,255,.85)','--tarot-accent':'#7a9ab0','--tarot-gold':'#c9a35c','--tarot-text':'#3a4248'}},
+  {id:'lightblue',name:'淺藍色',vars:{'--bg':'#eef4fa','--panel':'#ffffff','--text':'#2b3a48','--text-sub':'#8296a8','--user-bubble':'#b8dcf5','--user-text':'#1f3040','--dream-bubble':'#ffffff','--dream-text':'#2b3a48','--btn':'#5a95c8','--btn-text':'#fff','--input-bg':'#e4eef7','--input-text':'#2b3a48','--avatar-border':'#d5e2ee','--typing-bg':'#e4eef7','--typing-text':'#8296a8','--nav-bg':'#f6fafd','--divider':'#dce7f1','--accent':'#5a95c8','--tarot-bg':'#e4eef7','--tarot-card':'#ffffff','--tarot-accent':'#5a95c8','--tarot-gold':'#c9a35c','--tarot-text':'#2b3a48'}},
+  {id:'lightbrown',name:'淺棕色',vars:{'--bg':'#f6f1e9','--panel':'#ffffff','--text':'#463a2c','--text-sub':'#a08e78','--user-bubble':'#e8d6b8','--user-text':'#4a3a24','--dream-bubble':'#ffffff','--dream-text':'#463a2c','--btn':'#b08a5a','--btn-text':'#fff','--input-bg':'#f0e8da','--input-text':'#463a2c','--avatar-border':'#e4d8c5','--typing-bg':'#f0e8da','--typing-text':'#a08e78','--nav-bg':'#fbf7f0','--divider':'#eae0d0','--accent':'#b08a5a','--tarot-bg':'#f0e8da','--tarot-card':'#fbf7f0','--tarot-accent':'#b08a5a','--tarot-gold':'#c9a35c','--tarot-text':'#463a2c'}},
+  {id:'lightorange',name:'淡橙色',vars:{'--bg':'#fdf4ec','--panel':'#ffffff','--text':'#4a382a','--text-sub':'#a89080','--user-bubble':'#ffd9b0','--user-text':'#4a3018','--dream-bubble':'#ffffff','--dream-text':'#4a382a','--btn':'#e89850','--btn-text':'#fff','--input-bg':'#fbe9d8','--input-text':'#4a382a','--avatar-border':'#f0ddc8','--typing-bg':'#fbe9d8','--typing-text':'#a89080','--nav-bg':'#fffaf5','--divider':'#f4e4d2','--accent':'#e89850','--tarot-bg':'#fbe9d8','--tarot-card':'#fffaf5','--tarot-accent':'#e89850','--tarot-gold':'#c9a35c','--tarot-text':'#4a382a'}},
+];
+const THEME_ALIAS = { cream:'wechat', blacksesame:'deepgreen' };
+
+const FONTS = [
+  {id:'system',name:'跟隨系統',stack:'system-ui,-apple-system,sans-serif',sample:'跟隨系統'},
+  {id:'heiti',name:'黑體',stack:'"PingFang TC","Heiti TC","Microsoft JhengHei","Noto Sans TC",sans-serif',sample:'黑體'},
+  {id:'songti',name:'宋體',stack:'"Songti TC","Songti SC","SimSun","Noto Serif TC",serif',sample:'宋體'},
+  {id:'kaiti',name:'楷體',stack:'"Kaiti TC","Kaiti SC","STKaiti","KaiTi",serif',sample:'楷體'},
+  {id:'yuanti',name:'圓體',stack:'"Yuanti TC","Yuanti SC","YouYuan","PingFang TC",sans-serif',sample:'圓體'},
+  {id:'mono',name:'等寬',stack:'"SF Mono","Menlo","Consolas","Courier New",monospace',sample:'等寬'},
+];
+function getFontStack(id){ const f=FONTS.find(x=>x.id===id); return f?f.stack:FONTS[0].stack; }
+
+const DEFAULT_CARDS = ['今天也想你了','你是我最喜歡的夢','累了就靠過來','有我在，別怕','想聽你的聲音','你笑起來最好看','我們一起慢慢走','記得吃飯','早安，我的夢','晚安，做個好夢','不管多遠都會想你','你是特別的','謝謝你出現在我生命裡','想和你一起看星星','永遠站在你這邊'];
+const DEFAULT_KAOMOJI = ['(๑•̀ㅂ•́)و✧','(｡･ω･｡)','(๑>◡<๑)','(´；ω；｀)','(・∀・)','(｡•́︿•̀｡)','(๑˃̵ᴗ˂̵)','(￣▽￣)','(´▽`ʃ♡ƪ)','(๑•́ ₃ •̀๑)','( ˘ ³˘)♥','(っ˘ω˘ς )','٩(◕‿◕)۶','(￣ω￣;)','(๑￫ܫ￩)','(*/ω＼*)','(๑•̀ㅁ•́ฅ)'];
+
+/* ================= 彻底修复的默认字卡库 ================= */
+const DEFAULT_CARD_BANK = (()=>{
+  const out = new Set();
+  const add = s => { const v=String(s).trim(); if(v) out.add(v); };
+  // 使用正則表達式全局替換所有 {w}，避免漏替換
+  const cross = (templates, words) => { 
+    templates.forEach(t=>words.forEach(w=>add(t.replace(/\{w\}/g, w)))); 
+  };
+
+  // 1. 基础日常与关心
+  cross(['早安，{w}','晚安，{w}','今天也要{w}喔','記得{w}','先{w}再說','你{w}了嗎'],['好好吃飯','早點休息','照顧自己','開心一點','多喝水','笑一個','慢慢來','別太累']);
+  cross(['{w}，今天過得好嗎','{w}，想你了','{w}，在忙嗎','{w}，有空理我嗎'],['寶貝','親愛的','我的夢','小可愛','你']);
+  cross(['{w}的時候記得告訴我','如果{w}，我在','別忘了{w}','要記得{w}'],['難過','開心','累了','生病','睡不著','想哭','壓力大','無聊']);
+  cross(['{w}，我陪你','{w}，別硬撐','{w}，有我在'],['累了就休息','難過就哭出來','不想笑就別笑','不舒服要說']);
+  cross(['{w}了嗎','記得{w}','{w}要吃飽'],['吃飯','吃早餐','吃午餐','吃晚餐','吃點東西','喝水']);
+  cross(['{w}辛苦了','{w}加油','{w}別太拚'],['上班','上課','加班','讀書','考試','寫報告','開會']);
+  cross(['{w}，記得穿暖','{w}，別熬夜','{w}，按時吃飯'],['天冷','加班','忙起來','一個人']);
+  cross(['{w}的時候，想想我','{w}，我會擔心'],['太累','不吃飯','熬夜','淋雨','一個人走夜路']);
+  cross(['{w}，吃了嗎','{w}，睡了嗎','{w}，在幹嘛'],['寶貝','親愛的','你','小可愛']);
+  cross(['{w}，記得休息','{w}，別太累','{w}，早點睡'],['寶貝','親愛的','你']);
+  cross(['{w}，有沒有想我','{w}，想不想我'],['寶貝','親愛的','你','小可愛']);
+  cross(['{w}，要記得想我','{w}，不許忘了我'],['寶貝','親愛的','你']);
+
+  // 2. 撒娇与想念
+  cross(['人家{w}嘛','陪我{w}好不好','我想要{w}','可以{w}嗎','你不{w}我會難過'],['抱抱','親親','牽手','撒嬌','賴著你','多看你一眼','陪著我','寵著我']);
+  cross(['哼，{w}','討厭啦，{w}','不管，{w}'],['你不理我','你都不看我','你偏心','我要生氣了','快哄我']);
+  cross(['想{w}了','好想{w}','今天特別想{w}','連呼吸都在想{w}'],['你','抱你','見你','聽你聲音','你的笑','你的溫度','和你說話']);
+  cross(['{w}的時候，我都在想你','{w}，腦子裡全是你'],['發呆','走路','吃飯','睡前','醒來','下雨','看星星']);
+  cross(['再{w}五分鐘','最後{w}一次','就{w}一下下'],['睡','玩','抱','親','賴床','看手機']);
+  cross(['你不{w}我就不走','{w}嘛，拜託'],['抱我','親我','陪我','哄我','誇我']);
+  cross(['{w}，看看我','{w}，理理我','{w}，陪我一下'],['寶貝','親愛的','你','小可愛']);
+  cross(['{w}！現在！','{w}，快點','{w}，不許拒絕'],['抱我','親我','回我','看我','哄我','陪我']);
+  cross(['{w}，誇我','{w}，我乖不乖','{w}，我好不好'],['寶貝','親愛的','你','小可愛']);
+  cross(['{w}，不要走','{w}，再待一會','{w}，陪我久一點'],['寶貝','親愛的','你','小可愛']);
+  cross(['{w}，我想你了','{w}，想你想得睡不著'],['寶貝','親愛的','你','小可愛']);
+  cross(['{w}，抱一下','{w}，抱緊我','{w}，我要抱抱'],['寶貝','親愛的','你','小可愛']);
+  cross(['{w}的時候，只想被你抱','{w}，抱抱我好不好'],['難過','累','冷','想哭','睡不著']);
+  cross(['{w}，我不開心','{w}，哄我'],['你理別人','你對別人笑','你回別人消息','你誇別人']);
+  cross(['{w}，好不好','{w}，拜託','{w}，就一次'],['抱我','親我','陪我','哄我','看我']);
+  cross(['{w}嘛','{w}一下下就好'],['抱抱','親親','陪我','哄我']);
+  cross(['{w}，人家想你了','{w}，人家要抱抱'],['寶貝','親愛的','你']);
+  cross(['{w}，人家不開心','{w}，人家要哄'],['寶貝','親愛的','你']);
+  cross(['{w}，只喜歡你','{w}，只愛你'],['寶貝','親愛的','你']);
+  cross(['{w}，想你了','{w}，好想你'],['寶貝','親愛的','你','小可愛']);
+  cross(['{w}的時候，特別想你','{w}，滿腦子都是你'],['發呆','睡前','醒來','下雨','看星星']);
+
+  // 3. 夸奖与告白
+  cross(['你{w}','你真的很{w}','怎麼可以這麼{w}'],['好看','可愛','溫柔','厲害','貼心','聰明','善良','有趣','帥氣','迷人']);
+  cross(['{w}的你，最讓人心動','{w}的樣子我好喜歡'],['笑起來','認真','撒嬌','害羞','生氣','發呆','睡著']);
+  cross(['我{w}你','真的很{w}你','比昨天更{w}你'],['喜歡','愛','想念','在乎','需要']);
+  cross(['{w}，是我最想做的事','{w}，是我最想說的話'],['喜歡你','陪著你','保護你','等你','抱緊你']);
+  cross(['{w}！','{w}～','嘿嘿，{w}'],['抓到你了','偷看你','被你發現了','我才沒有','才不告訴你','你猜']);
+  cross(['{w}，不然呢','{w}，你說呢'],['當然是想你','當然是喜歡你','當然要陪你','還用問嗎']);
+  cross(['{w}，是我的最愛','{w}，無人能敵'],['你','你的笑','你的溫柔','你的懷抱']);
+  cross(['我{w}你','最{w}你了'],['好喜歡','好愛','好想','好疼']);
+  cross(['{w}，快說你也想我','{w}，不許不想我'],['寶貝','親愛的','你']);
+  cross(['{w}，遇見你真好','{w}，有你真好'],['寶貝','親愛的','你','我的夢']);
+  cross(['{w}，是我最幸運的事','{w}，是我最珍惜的'],['遇見你','喜歡你','被你喜歡','陪著你']);
+  cross(['{w}，你真好','{w}，你最好了'],['寶貝','親愛的','你','小可愛']);
+  cross(['{w}，謝謝你','{w}，辛苦你了'],['陪我','聽我說話','包容我','記得我','來找我']);
+  cross(['{w}，我喜歡你','{w}，我愛你'],['寶貝','親愛的','你','小可愛']);
+
+  // 4. 安慰与鼓励
+  cross(['{w}沒關係的','{w}，慢慢來','{w}，不是你的錯'],['失敗','做不好','被誤會','心情不好','哭出來','放棄']);
+  cross(['就算{w}，我也在','{w}的時候，記得回頭看我'],['全世界都不理你','你覺得自己不夠好','天黑','下雨','很累']);
+  cross(['{w}，我一直在','{w}，別怕','{w}，有我'],['睡不著','難過','孤單','害怕','想哭','無聊']);
+  cross(['{w}的時候，我會陪你','{w}，我不會走'],['天黑','下雨','很累','想放棄','一個人的時候']);
+  cross(['你{w}，我相信你','{w}，你可以的','{w}，別放棄'],['一定做得到','很棒','很努力','很勇敢','會成功']);
+  cross(['就算{w}，我也為你驕傲','{w}的你，最帥/最美'],['失敗','跌倒了','慢慢來','不完美']);
+  cross(['{w}，我在這裡','{w}，別怕','{w}，有我呢'],['寶貝','親愛的','你','小可愛']);
+  cross(['{w}的時候，我不會走','{w}，我會一直陪著你'],['難過','孤單','害怕','想哭','天黑']);
+  cross(['{w}，加油','{w}，你可以的'],['寶貝','親愛的','你','小可愛']);
+  cross(['{w}，別怕','{w}，我在'],['失敗','跌倒','難過','緊張','害怕']);
+
+  // 5. 日常分享与生活
+  cross(['今晚的{w}很好看，但不如你','{w}的時候，最適合想你'],['月亮','星星','風','夜色','雨聲']);
+  cross(['{w}，起床了嗎','{w}，早安呀','{w}，今天也要元氣滿滿'],['寶貝','親愛的','我的夢','小可愛','你']);
+  cross(['醒來第一件事就是{w}','{w}的早晨，因為你而美好'],['想你','看手機','等你的消息','笑']);
+  cross(['{w}，記得多穿點','{w}，別淋雨','{w}，注意安全'],['天冷了','下雨了','太陽很大','風很大','降溫了']);
+  cross(['{w}的天氣，適合想你','{w}的時候，想和你一起'],['下雨','晴天','陰天','起風','下雪','很熱','很冷']);
+  cross(['想和你一起{w}','下次我們去{w}'],['吃飯','吃火鍋','吃甜點','喝咖啡','吃路邊攤','吃宵夜']);
+  cross(['{w}完記得休息','{w}的時候也要想我'],['忙完','做完','讀完','考完']);
+  cross(['想和你去{w}','下次一起去{w}吧'],['看海','看山','看星星','旅行','散步','逛夜市','看展','露營']);
+  cross(['{w}的時候，要牽著我的手','{w}的路上，有你真好'],['出門','散步','旅行','回家','迷路']);
+  cross(['{w}要記得吃藥','{w}多休息','{w}別硬撐'],['生病','感冒','發燒','頭痛','不舒服','咳嗽']);
+  cross(['你{w}，我會心疼','{w}的時候，讓我照顧你'],['生病','受傷','難受','哭','累倒']);
+  cross(['{w}快樂','{w}要開心','{w}，想和你一起過'],['生日','新年','中秋','聖誕','情人節','端午','跨年']);
+  cross(['{w}的願望是{w}','{w}這天，最想見你'],['生日','新年','聖誕','情人節','跨年']);
+  cross(['{w}，對不起','{w}，是我不好','{w}，別生氣了好嗎'],['昨天','剛剛','那件事','我說錯話','我太晚回']);
+  cross(['我不該{w}','下次不會{w}了'],['讓你等','讓你難過','忽略你','凶你','亂發脾氣']);
+  cross(['{w}，我會吃醋','{w}的時候，我心裡酸酸的'],['你提到別人','你對別人笑','你跟別人出去','你回別人消息']);
+  cross(['{w}只能對我','{w}是我的'],['笑','溫柔','撒嬌','好']);
+  cross(['昨晚夢到{w}','夢裡有你{w}'],['你','我們','一起散步','一起看海','你對我笑']);
+  cross(['{w}，夢裡見','{w}，希望你夢到我'],['晚安','早點睡','閉上眼','睡著後']);
+  cross(['以後想和你{w}','未來想和你{w}'],['一起生活','一起旅行','一起變老','看很多日出','養一隻貓','有一個家']);
+  cross(['{w}的未來，要有你','{w}的日子，想和你一起過'],['每一個','所有','往後','接下來']);
+  cross(['還記得{w}嗎','想起{w}，就笑了'],['那天','我們第一次見面','你說的話','一起走的路','那場雨','那個夜晚']);
+  cross(['{w}的時候，真的很開心','{w}的回憶，我一直留著'],['和你一起','那天','第一次','最後一次','小時候']);
+  cross(['{w}，有點小難過','{w}，想被你哄'],['今天','現在','突然','不知道為什麼']);
+  cross(['{w}，你要負責','{w}，都是你害的'],['我心情不好','我睡不著','我想你','我笑了']);
+  cross(['{w}，過來','{w}，抱抱','{w}，親一個'],['寶貝','親愛的','小可愛','我的夢','你']);
+  cross(['{w}，我最喜歡你了','{w}，只對你這樣'],['寶貝','親愛的','小可愛','你']);
+  cross(['{w}了嗎','{w}了沒','記得{w}'],['洗澡','刷牙','關燈','鎖門','收衣服','倒垃圾','充電']);
+  cross(['{w}的時候，要小心','{w}別忘了帶傘'],['出門','騎車','開車','走路','回家']);
+  cross(['你{w}，我就開心','你{w}，我就安心'],['回我消息','看我一眼','抱我一下','說喜歡我']);
+  cross(['{w}，心情也跟著{w}','{w}的日子，適合{w}'],['下雨','晴天','起風','下雪','陰天']);
+  cross(['今天{w}了','剛剛{w}了','我{w}了'],['吃到好吃的','看到好看的','遇到有趣的','學會新東西','被誇了']);
+  cross(['{w}，想第一個告訴你','{w}的時候，想到你'],['開心的事','難過的事','好玩的事','小發現']);
+  cross(['{w}，遇見你真好','{w}，有你真好'],['寶貝','親愛的','你','我的夢']);
+  cross(['{w}，晚安','{w}，好夢','{w}，早點睡'],['寶貝','親愛的','你','小可愛','我的夢']);
+  cross(['{w}，夢裡要有我','{w}，明天見'],['晚安','早點睡','閉上眼']);
+
+  // 6. 新增：复合情感与长句
+  cross(['如果{w}，我會一直陪著你','就算{w}，也別怕'],['你難過','你累了','你哭泣','你跌倒','天塌下來']);
+  cross(['我{w}，你也要{w}','我們要一起{w}'],['乖乖的','開開心心','努力生活','變成更好的人']);
+  cross(['想把你{w}','想一直{w}'],['藏起來','抱緊','寵著','護在身後']);
+  cross(['{w}，你是我生命裡的光','{w}，有你在真好'],['親愛的','寶貝','傻瓜','小可愛']);
+  cross(['今天{w}，但想到你就覺得很甜','今天{w}，想聽你的聲音'],['好累','好忙','天氣好冷','有點不開心']);
+  cross(['{w}，我想跟你一起過','{w}，想和你並肩'],['每一個明天','所有的節日','未來的日子']);
+  cross(['你{w}，我會心疼','你{w}，我會難過'],['受傷','哭泣','皺眉','受委屈']);
+  cross(['我在{w}，也在{w}','我會{w}，也會{w}'],['想你','愛你','陪你','等你','保護你']);
+  cross(['可以{w}嗎？','能不能{w}？'],['再陪我一下','多看我一眼','不要走','抱緊我','再待一會']);
+  cross(['其實我{w}','偷偷告訴你{w}'],['很想你','很喜歡你','一直在看你','離不開你']);
+  cross(['無論{w}，我都會{w}','不管{w}，我都會{w}'],['發生什麼','你在哪裡','多遠','多久']);
+  cross(['我會一直在{w}','我會永遠{w}'],['你身邊','你身後','這裡','愛你']);
+
+  // 7. 直白短句与生动词汇
+  ['我在','我在呢','有我在','別怕','慢慢來','辛苦了','早點睡','記得吃飯','多喝水','想你了','喜歡你','愛你','陪你','哄你','抱抱','親親','晚安','早安','好夢','明天見','等你','想你','最喜歡你','只喜歡你','你真好','你最好了','謝謝你','遇見你真好','有你真好','一起走下去','永遠站在你這邊','不管多遠都想你','你是特別的','你笑起來最好看','想聽你的聲音','累了就靠過來','我們一起慢慢走','做個好夢','今天也想你了','你是我最喜歡的夢','想見你','想抱你','想親你','想牽你的手','想和你說話','想和你見面','想和你一起','想陪你','想愛你','想疼你','想寵你','想護著你','想保護你'].forEach(add);
+
+  const extraWords = ['抱抱','親親','牽手','想你','喜歡你','愛你','陪你','哄你','看你','聽你','等你','找你','賴著你','黏著你','跟著你','守著你','抱緊你','護著你'];
+  const extraTpl = ['我想{w}','好想{w}','就想{w}','只想{w}','一直{w}','永遠{w}','每天{w}','現在就想{w}','想要{w}','渴望{w}'];
+  cross(extraTpl, extraWords);
+
+  const extraWords2 = ['你','寶貝','親愛的','小可愛','我的夢','你呀','你喔','傻瓜','笨蛋'];
+  const extraTpl2 = ['{w}，早安','{w}，晚安','{w}，想你','{w}，喜歡你','{w}，抱抱','{w}，親親','{w}，加油','{w}，別累','{w}，早點睡','{w}，記得吃飯','{w}，要開心','{w}，有我在','{w}，我陪你','{w}，別怕','{w}，慢慢來','{w}，辛苦了','{w}，謝謝你','{w}，最好了','{w}，真可愛','{w}，真好看','{w}，別哭','{w}，別難過'];
+  cross(extraTpl2, extraWords2);
+
+  // 8. 高度生活化与情绪化表达
+  cross(['我剛剛{w}了','我現在{w}'],['在發呆','在想你','在看手機','在等你的消息','準備睡覺','剛醒','有點餓','有點無聊']);
+  cross(['你{w}了嗎','你{w}了沒'],['下班','放學','吃飽','洗澡','準備睡覺','回家','到公司','到學校']);
+  cross(['今天想吃{w}','想吃{w}'],['火鍋','燒烤','甜點','冰淇淋','炸雞','拉麵','壽司','奶茶']);
+  cross(['想聽你說{w}','你說{w}好不好'],['晚安','早安','喜歡我','愛我','想我','抱抱']);
+  cross(['你{w}，我很開心','你{w}，我很安心'],['回我消息','接我電話','說想我','說愛我','陪我聊天']);
+  cross(['我們去{w}吧','下次去{w}'],['看電影','逛街','吃大餐','遊樂園','旅行','海邊','山上']);
+  cross(['如果{w}就好了','如果{w}就好了'],['你在身邊','能抱到你','能見到你','能聽你說話']);
+  cross(['我有一點{w}','我超級{w}'],['想你了','不開心','難過','累了','幸福','喜歡你','愛你']);
+  cross(['不管{w}，我都在','就算{w}，我也愛你'],['發生什麼','你變成什麼樣','多遠','多久']);
+  cross(['其實我很{w}','我真的很{w}'],['怕黑','怕孤單','想你','在乎你','喜歡你','愛你']);
+  cross(['你是我{w}','你是我{w}'],['最喜歡的人','最重要的人','唯一的夢','所有的光','依靠']);
+  
+  return Array.from(out);
+})();
+const DEFAULT_CARD_BANK_SET = new Set(DEFAULT_CARD_BANK);
+
+const DEFAULT_SETTINGS = {
+  readReceipt:false, quoteEnabled:true, replyDelay:5,
+  activeMessage:false, activeMsgMin:30, activeMsgMax:90,
+  activeCall:false, typingEnabled:true, typingAvatar:true, typingText:'夢角正在輸入...',
+  starDeco:false, shape:'tail', themeId:'wechat',
+  customColors:null, bgImageKey:null, bgImage:null,
+  activeLetter:false, letterSentences:30,
+  useDefaultCards:false,
+  fontFamily:'system',
+  patCards:[...DEFAULT_PAT_CARDS],
+  patBackEnabled:true,
+  patBackChance:20,
+  concatEnabled:true,
+  concatMin:2,
+  concatMax:2,
+  concatChance:15
+};
+
+let state = { dreams:[], profile:{name:'訪客',avatar:null}, letters:[], currentDreamId:null, libTab:'cards', data:null, defaultCardPage:0 };
+let typingTimer=null, activeMsgTimer=null, callCheckTimer=null, letterCheckTimer=null;
+let pendingQuote=null, ctxTarget=null;
+
+/* ================= IndexedDB ================= */
+let dbPromise=null;
+function openDB(){
+  if(dbPromise) return dbPromise;
+  dbPromise = new Promise((res,rej)=>{
+    const req = indexedDB.open(IDB_NAME,1);
+    req.onupgradeneeded = e=>{ const db=e.target.result; if(!db.objectStoreNames.contains(IDB_STORE)) db.createObjectStore(IDB_STORE); };
+    req.onsuccess = e=>res(e.target.result);
+    req.onerror = e=>rej(e.target.error);
+  });
+  return dbPromise;
+}
+async function idbPut(key,dataURL){ const db=await openDB(); return new Promise((res,rej)=>{ const tx=db.transaction(IDB_STORE,'readwrite'); tx.objectStore(IDB_STORE).put(dataURL,key); tx.oncomplete=()=>res(); tx.onerror=()=>rej(tx.error); }); }
+async function idbGet(key){ const db=await openDB(); return new Promise((res,rej)=>{ const tx=db.transaction(IDB_STORE,'readonly'); const r=tx.objectStore(IDB_STORE).get(key); r.onsuccess=()=>res(r.result||null); r.onerror=()=>rej(r.error); }); }
+async function idbDel(key){ const db=await openDB(); return new Promise((res,rej)=>{ const tx=db.transaction(IDB_STORE,'readwrite'); tx.objectStore(IDB_STORE).delete(key); tx.oncomplete=()=>res(); tx.onerror=()=>rej(tx.error); }); }
+
+/* ================= 工具 ================= */
+const uid = ()=>Date.now().toString(36)+Math.random().toString(36).slice(2,8);
+const now = ()=>Date.now();
+const esc = s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmtTime = ts=>{ const d=new Date(ts); return d.getHours().toString().padStart(2,'0')+':'+d.getMinutes().toString().padStart(2,'0'); };
+const fmtDate = ts=>{ const d=new Date(ts); return `${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()}`; };
+const dayKey = ts=>{ const d=new Date(ts); return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`; };
+const rand = (a,b)=>a+Math.random()*(b-a);
+const randInt = (a,b)=>Math.floor(rand(a,b+1));
+const pick = arr=>arr[Math.floor(Math.random()*arr.length)];
+function loadJSON(k,def){ try{ const v=localStorage.getItem(k); return v?JSON.parse(v):def; }catch(e){ return def; } }
+function saveJSON(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){ console.warn('localStorage write failed',e); } }
+function toast(msg){ const root=document.getElementById('toastRoot'); const el=document.createElement('div'); el.textContent=msg; el.style.cssText='position:fixed;bottom:calc(80px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);background:rgba(0,0,0,.75);color:#fff;padding:9px 18px;border-radius:12px;font-size:13.5px;z-index:400;'; root.appendChild(el); setTimeout(()=>el.remove(),2000); }
+function readFileAsDataURL(file){ return new Promise((res,rej)=>{ const r=new FileReader(); r.onload=()=>res(r.result); r.onerror=rej; r.readAsDataURL(file); }); }
+
+/* ================= 数据层 ================= */
+function loadDreams(){ state.dreams = loadJSON(K_DREAMS,[]); }
+function saveDreams(){ saveJSON(K_DREAMS,state.dreams); }
+function loadProfile(){ state.profile = loadJSON(K_PROFILE,{name:'訪客',avatar:null}); }
+function saveProfile(){ saveJSON(K_PROFILE,state.profile); }
+function loadLetters(){ state.letters = loadJSON(K_LETTERS,[]); }
+function saveLetters(){ saveJSON(K_LETTERS,state.letters); }
+function getDream(id){ return state.dreams.find(d=>d.id===id); }
+function getData(dreamId){
+  const d = loadJSON(dataKey(dreamId),null);
+  if(d) return Object.assign({messages:[],cards:[...DEFAULT_CARDS],kaomoji:[...DEFAULT_KAOMOJI],stickers:[],settings:{...DEFAULT_SETTINGS, patCards:[...DEFAULT_PAT_CARDS]}},d);
+  return {messages:[],cards:[...DEFAULT_CARDS],kaomoji:[...DEFAULT_KAOMOJI],stickers:[],settings:{...DEFAULT_SETTINGS, patCards:[...DEFAULT_PAT_CARDS]}};
+}
+function saveData(dreamId,d){ saveJSON(dataKey(dreamId),d); }
+function ensureData(dreamId){ const d=getData(dreamId); saveData(dreamId,d); return d; }
+function getReplyPool(data){
+  if(data.settings.useDefaultCards){
+    const self = data.cards||[];
+    const sample = [];
+    const n = Math.min(400, DEFAULT_CARD_BANK.length);
+    for(let i=0;i<n;i++) sample.push(DEFAULT_CARD_BANK[Math.floor(Math.random()*DEFAULT_CARD_BANK.length)]);
+    return self.concat(sample);
+  }
+  return data.cards||[];
+}
+function getPatPool(data){
+  const arr = data?.settings?.patCards;
+  return (Array.isArray(arr)&&arr.length)?arr:DEFAULT_PAT_CARDS;
+}
+
+/* 头像/背景：dataURL 存 IDB，localStorage 只存引用键 */
+async function saveDreamAvatar(dreamId,dataURL){
+  const key = idbKey(dreamId,'avatar');
+  await idbPut(key,dataURL);
+  const d = getDream(dreamId); if(d){ d.avatarKey = key; saveDreams(); }
+  return key;
+}
+async function loadDreamAvatar(dreamId){
+  const d = getDream(dreamId); if(!d) return null;
+  if(d.avatarKey && d.avatarKey.startsWith('data:')) return d.avatarKey;
+  if(d.avatarKey) return await idbGet(d.avatarKey);
+  return null;
+}
+async function saveProfileAvatar(dataURL){
+  await idbPut(PROFILE_AVATAR_KEY,dataURL);
+  state.profile.avatar = PROFILE_AVATAR_KEY; saveProfile();
+}
+async function saveDreamBg(dreamId,dataURL){
+  const key = idbKey(dreamId,'bg');
+  await idbPut(key,dataURL);
+  state.data.settings.bgImageKey = key;
+  saveData(dreamId,state.data);
+  return key;
+}
+async function loadDreamBg(dreamId){
+  const data = getData(dreamId);
+  if(data.settings.bgImageKey) return await idbGet(data.settings.bgImageKey);
+  if(data.settings.bgImage && data.settings.bgImage.startsWith('data:')) return data.settings.bgImage;
+  return null;
+}
+async function clearDreamBg(dreamId){
+  const data = getData(dreamId);
+  if(data.settings.bgImageKey){
+    try{ await idbDel(data.settings.bgImageKey); }catch(e){}
+  }
+  data.settings.bgImageKey = null;
+  data.settings.bgImage = null;
+  saveData(dreamId,data);
+  if(state.currentDreamId===dreamId) state.data = data;
+}
+
+/* ================= 首次初始化默认梦角 ================= */
+function ensureFirstDream(){
+  const inited = localStorage.getItem(K_INITED);
+  if(inited) return;
+  loadDreams();
+  if(!state.dreams.length){
+    const d = { id: uid(), name: '星野', avatarKey: null };
+    state.dreams.push(d);
+    saveDreams();
+    ensureData(d.id);
+  }
+  localStorage.setItem(K_INITED,'1');
+}
+
+/* ================= 主题 ================= */
+function applyTheme(settings){
+  const root=document.documentElement;
+  const tid = THEME_ALIAS[settings.themeId] || settings.themeId;
+  const theme = THEMES.find(t=>t.id===tid)||THEMES[0];
+  const vars = settings.customColors ? Object.assign({},theme.vars,settings.customColors) : theme.vars;
+  Object.entries(vars).forEach(([k,v])=>root.style.setProperty(k,v));
+  root.style.setProperty('--app-font', getFontStack(settings.fontFamily));
+  document.body.className = 'shape-'+(settings.shape||'tail');
+  
+  const isDark = isDarkColor(vars['--bg']);
+  if (isDark) {
+    document.body.classList.add('is-dark-bg');
+  } else {
+    document.body.classList.remove('is-dark-bg');
+  }
+
+  root.style.setProperty('--user-text', isDark?'#f0f0f0':'#2f3a2a');
+  if(settings.customColors){
+    root.style.setProperty('--dream-text', isDark?'#f0f0f0':'#333');
+  }
+}
+function isDarkColor(hex){
+  if(!hex) return false;
+  if(hex.startsWith('rgba')||hex.startsWith('rgb')) return false;
+  const c=hex.replace('#',''); if(c.length<6) return false;
+  const r=parseInt(c.slice(0,2),16),g=parseInt(c.slice(2,4),16),b=parseInt(c.slice(4,6),16);
+  return (r*299+g*587+b*114)/1000 < 128;
+}
+async function applyChatBackground(settings){
+  const list=document.getElementById('msgList');
+  let bgUrl = null;
+  if(settings.bgImageKey){
+    bgUrl = await idbGet(settings.bgImageKey);
+  } else if(settings.bgImage) {
+    bgUrl = settings.bgImage;
+  }
+  
+  if(bgUrl){
+    list.style.backgroundImage = `linear-gradient(var(--bg-mask, rgba(255,255,255,0.85)), var(--bg-mask, rgba(255,255,255,0.85))), url(${bgUrl})`;
+    list.style.backgroundSize = 'cover';
+    list.style.backgroundPosition = 'center bottom';
+  } else {
+    list.style.backgroundImage = 'none';
+  }
+}
+
+/* ================= 渲染：主页 ================= */
+async function renderHome(){
+  loadDreams(); loadProfile(); loadLetters();
+  document.getElementById('navTitle').textContent='聊天室';
+  document.getElementById('navBack').classList.add('hidden');
+  document.getElementById('navAccountName').textContent=state.profile.name||'訪客';
+  const list=document.getElementById('homeList');
+  const firstDream = state.dreams[0];
+  applyTheme(firstDream ? getData(firstDream.id).settings : {...DEFAULT_SETTINGS});
+  if(firstDream) applyChatBackground(getData(firstDream.id).settings);
+  if(!state.dreams.length){
+    list.innerHTML='<div class="home-empty">還沒有夢角<br>點右下角 ＋ 建立第一個夢角吧</div>';
+  } else {
+    const cardsHtml = await Promise.all(state.dreams.map(async d=>{
+      const data=getData(d.id);
+      const last = data.messages.filter(m=>m.type==='text'||m.type==='image'||m.type==='sticker').slice(-1)[0];
+      let preview='還沒有訊息';
+      if(last){ preview = last.type==='text' ? last.text : (last.type==='image'?'[圖片]':'[表情包]'); }
+      const unread = state.letters.filter(l=>l.dreamId===d.id&&l.gotReply&&!l.read).length;
+      const av = await loadDreamAvatar(d.id);
+      return `<div class="dream-card" data-id="${d.id}" oncontextmenu="dreamCtx(event,'${d.id}')">
+        <div class="dream-avatar">${av?`<img src="${av}">`:'<span class="ph">?</span>'}</div>
+        <div class="dream-info">
+          <div class="dream-name">${esc(d.name)}${unread?`<span class="dream-badge">${unread}</span>`:''}</div>
+          <div class="dream-preview">${esc(preview)}</div>
+        </div>
+      </div>`;
+    }));
+    list.innerHTML = cardsHtml.join('');
+    list.querySelectorAll('.dream-card').forEach(card=>{
+      const id=card.dataset.id;
+      let pressTimer=null;
+      card.addEventListener('touchstart',e=>{ pressTimer=setTimeout(()=>{ pressTimer=null; dreamCtx(e,id); },500); },{passive:true});
+      card.addEventListener('touchend',()=>{ if(pressTimer){clearTimeout(pressTimer);pressTimer=null;} });
+      card.addEventListener('touchmove',()=>{ if(pressTimer){clearTimeout(pressTimer);pressTimer=null;} });
+    });
+    list.querySelectorAll('.dream-card').forEach(card=>{
+      card.addEventListener('click',()=>{ openChat(card.dataset.id); });
+    });
+  }
+  updateInboxBadge();
+  checkLettersOnHome();
+}
+function updateInboxBadge(){
+  const n=state.letters.filter(l=>l.gotReply&&!l.read).length;
+  const b=document.getElementById('inboxBadge');
+  if(n>0){ b.textContent=n; b.classList.remove('hidden'); } else b.classList.add('hidden');
+}
+function dreamCtx(e,dreamId){
+  e.preventDefault();
+  showCtxMenu(e.clientX||100,e.clientY||100,[
+    {label:'🗑️ 刪除夢角',fn:()=>confirmDeleteDream(dreamId)}
+  ]);
+}
+
+/* ================= 渲染：聊天 ================= */
+async function openChat(dreamId){
+  state.currentDreamId=dreamId;
+  const dream=getDream(dreamId); if(!dream) return;
+  const data=ensureData(dreamId);
+  state.data=data;
+  applyTheme(data.settings);
+  applyChatBackground(data.settings);
+  document.getElementById('pageHome').classList.remove('active');
+  document.getElementById('pageChat').classList.add('active');
+  document.getElementById('navBack').classList.remove('hidden');
+  document.getElementById('navTitle').textContent=`與 ${dream.name} 聊天`;
+  document.getElementById('topDreamName').textContent=dream.name;
+  document.getElementById('topUserName').textContent=state.profile.name||'我';
+  const dAv=await loadDreamAvatar(dreamId);
+  renderAvatar(dAv,'topDreamAvatar');
+  const pAv=state.profile.avatar ? (state.profile.avatar.startsWith('data:')?state.profile.avatar:await idbGet(state.profile.avatar)) : null;
+  renderAvatar(pAv,'topUserAvatar');
+  await renderMessages();
+  startTimers();
+  document.getElementById('msgInput').focus();
+}
+function renderAvatar(src,elId){
+  const el=document.getElementById(elId); if(!el) return;
+  if(src){ el.innerHTML=`<img src="${src}">`; } else { el.innerHTML='<span class="ph">?</span>'; }
+}
+async function renderMessages(){
+  const list=document.getElementById('msgList');
+  const data=state.data; const dream=getDream(state.currentDreamId);
+  if(!data||!dream){ list.innerHTML=''; return; }
+  const dreamAv=await loadDreamAvatar(state.currentDreamId);
+  const profAv=state.profile.avatar ? (state.profile.avatar.startsWith('data:')?state.profile.avatar:await idbGet(state.profile.avatar)) : null;
+  let html=''; let lastDay=null;
+  for(const m of data.messages){
+    const dk=dayKey(m.ts);
+    if(dk!==lastDay){ lastDay=dk; html+=`<div class="day-divider">${fmtDate(m.ts)} ${fmtTime(m.ts)}</div>`; }
+    if(m.type==='system'){ html+=`<div class="sys-msg"><span>${esc(m.text)}</span></div>`; continue; }
+    if(m.type==='call'){ html+=`<div class="sys-msg"><span>${esc(m.text)}</span></div>`; continue; }
+    if(m.type==='pat'){ html+=`<div class="sys-msg"><span>${esc(m.text)}</span></div>`; continue; }
+    const isUser=m.role==='user';
+    const avatarSrc = isUser ? profAv : dreamAv;
+    const name = isUser ? (state.profile.name||'我') : dream.name;
+    let inner='';
+    if(m.quote){ inner+=`<div class="quote-block">${esc(m.quote.name)}：${esc(m.quote.text.slice(0,40))}</div>`; }
+    if(m.type==='text'){
+      inner+=`<div class="bubble">${esc(m.text)}${data.settings.starDeco&&!isUser?'<svg class="star-deco" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.6L22 9.3l-5 4.8 1.2 7.1L12 17.8 5.8 21.2 7 14.1 2 9.3l7.1-.7z"/></svg>':''}</div>`;
+      if (m.isConcat) {
+        inner+=`<div class="concat-badge">✨ 拼接字卡</div>`;
+      }
+    }
+    else if(m.type==='image'){ inner+=`<img class="msg-img" src="${m.src}">`; }
+    else if(m.type==='sticker'){ inner+=`<img class="msg-sticker" src="${m.src}">`; }
+    else if(m.type==='survey'){ inner+=renderSurveyCard(m,isUser); }
+    const status = (data.settings.readReceipt&&isUser&&m.read!==undefined) ? `<div class="msg-status">${m.read?'已讀':'未讀'}</div>`:'';
+    html+=`<div class="msg-row ${isUser?'user':'dream'}" data-mid="${m.id}">
+      <div class="msg-avatar">${avatarSrc?`<img src="${avatarSrc}">`:'<span class="ph">?</span>'}</div>
+      <div class="msg-body">
+        <div class="msg-meta"><span>${esc(name)}</span><span>${fmtTime(m.ts)}</span></div>
+        ${inner}${status}
+      </div>
+    </div>`;
+  }
+  list.innerHTML=html;
+  bindMsgLongPress();
+  list.scrollTop=list.scrollHeight;
+}
+function renderSurveyCard(m,isUser){
+  const picked = m.answerIndex;
+  return `<div class="survey-card">
+    <div class="survey-title">${esc(m.question)}</div>
+    ${m.options.map((o,i)=>`<div class="survey-opt ${picked===i?'picked':''}">${i+1}. ${esc(o)}</div>`).join('')}
+    ${picked!==undefined?`<div class="survey-result">✓ ${esc(isUser?'你':getDream(state.currentDreamId).name)}選擇了：${esc(m.options[picked])}</div>`:''}
+  </div>`;
+}
+function bindMsgLongPress(){
+  document.querySelectorAll('.msg-row').forEach(row=>{
+    const mid=row.dataset.mid;
+    let timer=null;
+    const start=()=>{ timer=setTimeout(()=>{ timer=null; msgCtx(row,mid); },500); };
+    const cancel=()=>{ if(timer){clearTimeout(timer);timer=null;} };
+    row.addEventListener('touchstart',start,{passive:true});
+    row.addEventListener('touchend',cancel);
+    row.addEventListener('touchmove',cancel);
+    row.addEventListener('contextmenu',e=>{ e.preventDefault(); msgCtx(row,mid); });
+  });
+}
+function msgCtx(row,mid){
+  const rect=row.getBoundingClientRect();
+  showCtxMenu(rect.left+20,rect.top,[
+    {label:'💬 引用',fn:()=>quoteMsg(mid)},
+    {label:'📋 複製',fn:()=>copyMsg(mid)},
+    {label:'🗑️ 刪除',fn:()=>deleteMsg(mid)}
+  ]);
+}
+
+/* ================= 拍一拍 ================= */
+function openPatPanel(){
+  if(!state.data) return;
+  closePatPanel();
+  const dream=getDream(state.currentDreamId);
+  const list=getPatPool(state.data);
+  const panel=document.createElement('div');
+  panel.id='patPanel';
+  panel.innerHTML=`<div class="pat-head">
+      <div class="pat-title">拍一拍 ${esc(dream?.name||'')}</div>
+      <button class="pat-close" onclick="closePatPanel()">✕</button>
+    </div>
+    <div class="pat-grid">
+      ${list.map((t,i)=>`<button class="pat-item" onclick="patSend(${i})">${esc(t)}<span class="pat-del" onclick="event.stopPropagation();patDelete(${i})">✕</span></button>`).join('')}
+      <button class="pat-add" onclick="patAdd()">＋ 新增拍一拍</button>
+    </div>`;
+  document.body.appendChild(panel);
+}
+function closePatPanel(){ const p=document.getElementById('patPanel'); if(p) p.remove(); }
+function patAdd(){
+  const t=prompt('新增拍一拍內容（例如：拍了拍你的頭）');
+  if(!t || !t.trim()) return;
+  const data=state.data;
+  if(!Array.isArray(data.settings.patCards)||!data.settings.patCards.length) data.settings.patCards=[...DEFAULT_PAT_CARDS];
+  data.settings.patCards.push(t.trim());
+  saveData(state.currentDreamId,data);
+  openPatPanel();
+}
+function patDelete(i){
+  const data=state.data;
+  if(!Array.isArray(data.settings.patCards)||!data.settings.patCards.length) data.settings.patCards=[...DEFAULT_PAT_CARDS];
+  if(data.settings.patCards.length<=1){ toast('至少保留 1 條'); return; }
+  data.settings.patCards.splice(i,1);
+  saveData(state.currentDreamId,data);
+  openPatPanel();
+}
+function patSend(i){
+  const data=state.data; const dream=getDream(state.currentDreamId);
+  const list=getPatPool(data);
+  const text=list[i]; if(!text) return;
+  closePatPanel();
+  const userName=state.profile.name||'我';
+  const m={id:uid(),ts:now(),role:'system',type:'pat',text:`${userName} 拍了拍 ${dream.name}：${text}`};
+  data.messages.push(m);
+  saveData(state.currentDreamId,data);
+  renderMessages();
+  maybePatBack();
+}
+function maybePatBack(){
+  const data=state.data; if(!data) return;
+  const s=data.settings;
+  if(!s.patBackEnabled) return;
+  const chance = (s.patBackChance??20)/100;
+  if(Math.random()>=chance) return;
+  const dream=getDream(state.currentDreamId);
+  const list=getPatPool(data);
+  const text=pick(list);
+  const userName=state.profile.name||'我';
+  setTimeout(()=>{
+    if(!state.data) return;
+    const m={id:uid(),ts:now(),role:'system',type:'pat',text:`${dream.name} 拍了拍 ${userName}：${text}`};
+    state.data.messages.push(m);
+    saveData(state.currentDreamId,state.data);
+    if(document.getElementById('pageChat').classList.contains('active')) renderMessages();
+  }, 700);
+}
+
+/* ================= 消息发送 ================= */
+function sendText(){
+  const input=document.getElementById('msgInput');
+  const text=input.value.trim();
+  if(!text) return;
+  pushMessage({role:'user',type:'text',text,quote:pendingQuote?{name:pendingQuote.name,text:pendingQuote.text}:null});
+  input.value=''; input.style.height='38px';
+  cancelQuote();
+  scheduleDreamReply();
+}
+function pickChatImage(){
+  const f=document.getElementById('hiddenFile');
+  f.accept='image/*'; f.value='';
+  f.onchange=async()=>{
+    const file=f.files[0]; if(!file) return;
+    const dataURL=await readFileAsDataURL(file);
+    const key=`img_${uid()}`;
+    await idbPut(idbKey(state.currentDreamId,key),dataURL);
+    pushMessage({role:'user',type:'image',src:dataURL,imageKey:key});
+    scheduleDreamReply();
+  };
+  f.click();
+}
+function pushMessage(msg){
+  const m={id:uid(),ts:now(),read:false,...msg};
+  state.data.messages.push(m);
+  saveData(state.currentDreamId,state.data);
+  renderMessages();
+  return m;
+}
+function scheduleDreamReply(){
+  const data=state.data;
+  if(!data) return;
+  const delay=data.settings.replyDelay*1000;
+  if(typingTimer) clearTimeout(typingTimer);
+  if(data.settings.typingEnabled) showTyping();
+  typingTimer=setTimeout(()=>{
+    hideTyping();
+    dreamReply();
+  },delay);
+}
+function showTyping(){
+  const list=document.getElementById('msgList');
+  const dream=getDream(state.currentDreamId);
+  const data=state.data;
+  const old=document.getElementById('typingRow'); if(old) old.remove();
+  const el=document.createElement('div');
+  el.id='typingRow'; el.className='typing-row';
+  el.innerHTML=`${data.settings.typingAvatar&&dream.avatarKey?`<div class="msg-avatar"><img src="${dream.avatarKey.startsWith('data:')?dream.avatarKey:''}"></div>`:(data.settings.typingAvatar?'<div class="msg-avatar"><span class="ph">?</span></div>':'')}
+    <div class="typing-box">${esc(data.settings.typingText)}<span class="typing-dots"><span></span><span></span><span></span></span></div>`;
+  el.onclick=()=>{ const t=prompt('自訂打字提示文字',data.settings.typingText); if(t){ data.settings.typingText=t; saveData(state.currentDreamId,data); const box=el.querySelector('.typing-box'); box.firstChild.textContent=t; } };
+  list.appendChild(el);
+  
+  list.scrollTop = list.scrollHeight;
+  setTimeout(() => { list.scrollTop = list.scrollHeight; }, 50);
+}
+function hideTyping(){ const el=document.getElementById('typingRow'); if(el) el.remove(); }
+
+function dreamReply(){
+  const data=state.data; if(!data) return;
+  const pool=getReplyPool(data);
+  if(!pool.length) return;
+  const lastUser=[...data.messages].reverse().find(m=>m.role==='user'&&m.type==='text');
+  let quote=null;
+  if(data.settings.quoteEnabled && lastUser && Math.random()<0.4){
+    quote={name:state.profile.name||'我',text:lastUser.text};
+  }
+
+  let finalText = '';
+  let isConcat = false;
+  const s = data.settings;
+
+  if (s.concatEnabled && Math.random() < (s.concatChance/100)) {
+    isConcat = true;
+    const count = randInt(s.concatMin || 2, s.concatMax || 5);
+    const parts = [];
+    for(let i=0;i<count;i++) {
+      parts.push(pick(pool));
+    }
+    finalText = parts.join('，');
+  } else {
+    finalText = pick(pool);
+  }
+
+  pushMessage({role:'dream',type:'text',text:finalText,quote,isConcat});
+  if(data.settings.readReceipt){ data.messages.forEach(m=>{ if(m.role==='user') m.read=true; }); saveData(state.currentDreamId,data); }
+}
+function nudgeDream(){
+  if(!state.data) return;
+  showTyping();
+  setTimeout(()=>{ hideTyping(); dreamReply(); },1200);
+}
+function quoteMsg(mid){
+  const m=state.data.messages.find(x=>x.id===mid); if(!m) return;
+  const name=m.role==='user'?(state.profile.name||'我'):getDream(state.currentDreamId).name;
+  pendingQuote={name,text:m.text||'[媒體]'};
+  document.getElementById('qpText').textContent=`引用 ${name}：${(m.text||'[媒體]').slice(0,30)}`;
+  document.getElementById('quotePreview').classList.remove('hidden');
+  document.getElementById('msgInput').focus();
+}
+function cancelQuote(){ pendingQuote=null; document.getElementById('quotePreview').classList.add('hidden'); }
+function copyMsg(mid){
+  const m=state.data.messages.find(x=>x.id===mid); if(!m) return;
+  navigator.clipboard?.writeText(m.text||'').then(()=>toast('已複製')).catch(()=>toast('複製失敗'));
+}
+function deleteMsg(mid){
+  state.data.messages=state.data.messages.filter(m=>m.id!==mid);
+  saveData(state.currentDreamId,state.data);
+  renderMessages();
+}
+
+/* ================= 定时器 ================= */
+function startTimers(){
+  stopTimers();
+  const data=state.data; if(!data) return;
+  if(data.settings.activeMessage){
+    const tick=()=>{
+      const d=getData(state.currentDreamId);
+      if(!d.settings.activeMessage) return;
+      const wait=randInt(d.settings.activeMsgMin,d.settings.activeMsgMax)*1000;
+      activeMsgTimer=setTimeout(()=>{ if(document.getElementById('pageChat').classList.contains('active')){ dreamReply(); } tick(); },wait);
+    };
+    tick();
+  }
+  if(data.settings.activeCall){
+    callCheckTimer=setInterval(()=>{
+      if(!document.getElementById('pageChat').classList.contains('active')) return;
+      if(Math.random()<0.10) incomingCall();
+    },60000);
+  }
+  startLetterCheck();
+}
+function stopTimers(){
+  if(typingTimer) clearTimeout(typingTimer);
+  if(activeMsgTimer) clearTimeout(activeMsgTimer);
+  if(callCheckTimer) clearInterval(callCheckTimer);
+  typingTimer=activeMsgTimer=callCheckTimer=null;
+}
+
+/* ================= 通话 ================= */
+let callState=null;
+function renderCallUI(av,name,statusText,accepted){
+  const avHtml = av?`<img src="${av}">`:'<span style="font-size:36px;color:#fff;">?</span>';
+  let btns;
+  if(accepted){
+    btns = `<button class="call-btn mute" onclick="this.style.opacity=.4"><span>靜音</span></button>
+            <button class="call-btn mini" onclick="minimizeCall()"><span>縮小</span></button>
+            <button class="call-btn hang" onclick="endCall(true)"><span>掛斷</span></button>`;
+  } else {
+    btns = `<button class="call-btn hang" onclick="endCall(true)"><span>掛斷</span></button>
+            <button class="call-btn mini" onclick="minimizeCall()"><span>縮小</span></button>`;
+  }
+  const overlay=document.createElement('div');
+  overlay.id='callLayer';
+  overlay.innerHTML=`<div class="call-avatar">${avHtml}</div>
+    <div class="call-name">${esc(name)}</div>
+    <div class="call-status" id="callStatus">${statusText}</div>
+    <div class="call-btns">${btns}</div>`;
+  document.getElementById('callRoot').appendChild(overlay);
+}
+async function startCall(){
+  const dream=getDream(state.currentDreamId); if(!dream) return;
+  const av=await loadDreamAvatar(state.currentDreamId);
+  const accepted=Math.random()<0.5;
+  renderCallUI(av,dream.name,'正在撥號...',false);
+  callState={start:now(),dreamId:dream.id,accepted:false};
+  setTimeout(()=>{
+    if(!callState) return;
+    if(accepted){
+      callState.accepted=true;
+      const old=document.getElementById('callLayer'); if(old) old.remove();
+      renderCallUI(av,dream.name,'00:00',true);
+      const timer=setInterval(()=>{ if(!callState) return; const sec=Math.floor((now()-callState.start)/1000); const st=document.getElementById('callStatus'); if(st) st.textContent=`${Math.floor(sec/60).toString().padStart(2,'0')}:${(sec%60).toString().padStart(2,'0')}`; },1000);
+      callState.timer=timer;
+    } else {
+      endCall(true,'對方已拒絕');
+    }
+  },2500);
+}
+async function incomingCall(){
+  const dream=getDream(state.currentDreamId); if(!dream) return;
+  if(callState) return;
+  const av=await loadDreamAvatar(state.currentDreamId);
+  const avHtml = av?`<img src="${av}">`:'<span style="font-size:36px;color:#fff;">?</span>';
+  const overlay=document.createElement('div');
+  overlay.id='callLayer';
+  overlay.innerHTML=`<div class="call-avatar">${avHtml}</div>
+    <div class="call-name">${esc(dream.name)}</div>
+    <div class="call-status">來電中...</div>
+    <div class="call-btns">
+      <button class="call-btn hang" onclick="endCall(true,'未接來電')">拒絕</button>
+      <button class="call-btn mute" onclick="acceptIncoming()">接聽</button>
+      <button class="call-btn mini" onclick="minimizeCall()">縮小</button>
+    </div>`;
+  document.getElementById('callRoot').appendChild(overlay);
+  callState={incoming:true,dreamId:dream.id};
+  callState.timeout=setTimeout(()=>{ if(callState&&callState.incoming){ endCall(true,'未接來電'); } },15000);
+}
+function acceptIncoming(){
+  if(!callState) return;
+  clearTimeout(callState.timeout);
+  callState={start:now(),dreamId:state.currentDreamId,accepted:true};
+  const old=document.getElementById('callLayer'); if(old) old.remove();
+  const dream=getDream(state.currentDreamId);
+  loadDreamAvatar(state.currentDreamId).then(av=>{
+    renderCallUI(av,dream?.name||'',"00:00",true);
+    const timer=setInterval(()=>{ if(!callState||!callState.accepted) return; const sec=Math.floor((now()-callState.start)/1000); const st=document.getElementById('callStatus'); if(st) st.textContent=`${Math.floor(sec/60).toString().padStart(2,'0')}:${(sec%60).toString().padStart(2,'0')}`; },1000);
+    callState.timer=timer;
+  });
+}
+const MINI_SIZE = 72;
+function clampMiniPos(x,y){
+  const maxX = window.innerWidth - MINI_SIZE - 6;
+  const maxY = window.innerHeight - MINI_SIZE - 6;
+  return { x: Math.max(6, Math.min(maxX, x)), y: Math.max(6, Math.min(maxY, y)) };
+}
+function minimizeCall(){
+  if(!callState) return;
+  const overlay=document.getElementById('callLayer'); if(overlay) overlay.remove();
+  if(document.getElementById('callMini')) return;
+  const mini=document.createElement('div');
+  mini.id='callMini';
+  mini.innerHTML=`<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 4h4l2 5-3 2a13 13 0 0 0 5 5l2-3 5 2v4a2 2 0 0 1-2 2A17 17 0 0 1 3 6a2 2 0 0 1 2-2z"/></svg><span class="cm-timer" id="cmTimer">00:00</span>`;
+  const init=clampMiniPos(window.innerWidth - MINI_SIZE - 24, window.innerHeight - MINI_SIZE - 100);
+  mini.style.left=init.x+'px';
+  mini.style.top=init.y+'px';
+  document.body.appendChild(mini);
+  let dragging=false, moved=false, sx=0, sy=0, ox=0, oy=0;
+  const startDrag = (x,y)=>{ dragging=true; moved=false; sx=x; sy=y; ox=mini.offsetLeft; oy=mini.offsetTop; };
+  const moveDrag = (x,y)=>{
+    if(!dragging) return;
+    const dx=x-sx, dy=y-sy;
+    if(Math.abs(dx)>3||Math.abs(dy)>3) moved=true;
+    const p=clampMiniPos(ox+dx, oy+dy);
+    mini.style.left=p.x+'px'; mini.style.top=p.y+'px';
+  };
+  const endDrag = ()=>{ if(dragging && !moved){ resumeCallFromMini(); } dragging=false; };
+  mini.addEventListener('touchstart',e=>{ const t=e.touches[0]; startDrag(t.clientX,t.clientY); },{passive:true});
+  mini.addEventListener('touchmove',e=>{ e.preventDefault(); const t=e.touches[0]; moveDrag(t.clientX,t.clientY); },{passive:false});
+  mini.addEventListener('touchend',()=>endDrag());
+  mini.addEventListener('mousedown',e=>{ e.preventDefault(); startDrag(e.clientX,e.clientY); });
+  window.addEventListener('mousemove',e=>{ if(dragging) moveDrag(e.clientX,e.clientY); });
+  window.addEventListener('mouseup',()=>{ if(dragging) endDrag(); });
+  if(callState.timer) clearInterval(callState.timer);
+  callState.timer=setInterval(()=>{ if(!callState) return; const sec=Math.floor((now()-callState.start)/1000); const el=document.getElementById('cmTimer'); if(el) el.textContent=`${Math.floor(sec/60).toString().padStart(2,'0')}:${(sec%60).toString().padStart(2,'0')}`; },1000);
+}
+async function resumeCallFromMini(){
+  if(!callState) return;
+  const mini=document.getElementById('callMini'); if(mini) mini.remove();
+  const dream=getDream(state.currentDreamId);
+  const av=await loadDreamAvatar(state.currentDreamId);
+  const sec=callState.start?Math.floor((now()-callState.start)/1000):0;
+  const statusText=`${Math.floor(sec/60).toString().padStart(2,'0')}:${(sec%60).toString().padStart(2,'0')}`;
+  renderCallUI(av,dream?.name||'',statusText,true);
+  if(callState.timer) clearInterval(callState.timer);
+  callState.timer=setInterval(()=>{ if(!callState) return; const s=Math.floor((now()-callState.start)/1000); const st=document.getElementById('callStatus'); if(st) st.textContent=`${Math.floor(s/60).toString().padStart(2,'0')}:${(s%60).toString().padStart(2,'0')}`; },1000);
+}
+function endCall(record,reason){
+  const el=document.getElementById('callLayer'); if(el) el.remove();
+  const mini=document.getElementById('callMini'); if(mini) mini.remove();
+  if(callState?.timer) clearInterval(callState.timer);
+  if(callState?.timeout) clearTimeout(callState.timeout);
+  const sec=callState?Math.floor((now()-(callState.start||now()))/1000):0;
+  const dreamId=callState?.dreamId||state.currentDreamId;
+  callState=null;
+  if(record&&dreamId){
+    const data=getData(dreamId);
+    let text;
+    if(reason==='對方已拒絕') text='通話結束 · 對方已拒絕';
+    else if(reason==='未接來電') text='通話結束 · 未接來電';
+    else text=`通話結束 · ${Math.floor(sec/60).toString().padStart(2,'0')}:${(sec%60).toString().padStart(2,'0')}`;
+    data.messages.push({id:uid(),ts:now(),role:'system',type:'call',text});
+    saveData(dreamId,data);
+    if(dreamId===state.currentDreamId&&state.data) state.data=data;
+    if(document.getElementById('pageChat').classList.contains('active')) renderMessages();
+  }
+}
+
+/* ================= 问卷 ================= */
+function openSurveyBuilder(){
+  let opts=['',''];
+  const render=()=>`<h3>建立問卷</h3>
+    <div class="modal-label">題目（最多 60 字）</div>
+    <input class="modal-input" id="sqTitle" maxlength="60" placeholder="想問夢角什麼？">
+    <div class="modal-label">選項（2–5 個）</div>
+    <div id="sqOpts">${opts.map((o,i)=>`<div style="display:flex;gap:8px;margin-bottom:8px;"><input class="modal-input" style="margin:0;" data-i="${i}" value="${esc(o)}" placeholder="選項 ${i+1}"><button onclick="sqRemove(${i})" style="width:36px;border-radius:9px;background:var(--input-bg);color:var(--text-sub);">✕</button></div>`).join('')}</div>
+    ${opts.length<5?`<button class="lib-btn" onclick="sqAdd()">＋ 新增選項</button>`:''}
+    <div class="modal-actions"><button onclick="closeModal()">取消</button><button class="primary" onclick="submitSurvey()">發送</button></div>`;
+  openModal(render());
+  bindSurveyInputs();
+}
+function bindSurveyInputs(){
+  document.querySelectorAll('#sqOpts input').forEach(inp=>{ inp.oninput=()=>{ window.__sqOpts[+inp.dataset.i]=inp.value; }; });
+  window.__sqOpts=window.__sqOpts||[];
+}
+window.sqAdd=function(){ const vals=[...document.querySelectorAll('#sqOpts input')].map(i=>i.value); window.__sqOpts=vals; if(vals.length<5){ vals.push(''); } openSurveyBuilderWith(vals); };
+window.sqRemove=function(i){ const vals=[...document.querySelectorAll('#sqOpts input')].map(x=>x.value); if(vals.length<=2){toast('至少 2 個選項');return;} vals.splice(i,1); openSurveyBuilderWith(vals); };
+function openSurveyBuilderWith(vals){ opts=vals; openSurveyBuilder(); }
+function submitSurvey(){
+  const title=document.getElementById('sqTitle')?.value.trim();
+  const opts2=[...document.querySelectorAll('#sqOpts input')].map(i=>i.value.trim()).filter(Boolean);
+  if(!title){ toast('請輸入題目'); return; }
+  if(opts2.length<2){ toast('至少 2 個選項'); return; }
+  closeModal();
+  const m=pushMessage({role:'user',type:'survey',question:title,options:opts2});
+  const data=state.data;
+  const delay=data.settings.replyDelay*1000;
+  if(data.settings.typingEnabled) showTyping();
+  setTimeout(()=>{
+    hideTyping();
+    const idx=Math.floor(Math.random()*opts2.length);
+    m.answerIndex=idx; m.answered=true;
+    saveData(state.currentDreamId,state.data);
+    renderMessages();
+    setTimeout(()=>{
+      pushMessage({role:'dream',type:'text',text:`我選了「${opts2[idx]}」✨`});
+    },600);
+  },delay);
+}
+
+/* ================= 字卡库 ================= */
+function openLib(){
+  document.getElementById('pageHome').classList.remove('active');
+  document.getElementById('pageChat').classList.remove('active');
+  document.getElementById('pageLib').classList.add('active');
+  document.getElementById('navBack').classList.remove('hidden');
+  document.getElementById('navTitle').textContent='字卡庫';
+  renderLib();
+}
+function switchLibTab(tab){ state.libTab=tab; document.querySelectorAll('.lib-tab').forEach((t,i)=>{ t.classList.toggle('active', ['cards','kaomoji','stickers','settings'][i]===tab); }); renderLib(); }
+function renderLib(){
+  const body=document.getElementById('libBody');
+  const data=state.data||getData(state.currentDreamId);
+  if(!state.currentDreamId){ body.innerHTML='<div class="lib-empty">請先進入一個夢角聊天</div>'; return; }
+  if(state.libTab==='cards'){
+    const usingDefault = data.settings.useDefaultCards;
+    const totalPool = data.cards.length + (usingDefault?DEFAULT_CARD_BANK.length:0);
+    body.innerHTML=`
+    <div class="default-card-block">
+      <div class="default-card-head">
+        <div class="default-card-title">預設字卡庫 <span class="default-card-badge">${DEFAULT_CARD_BANK.length} 張</span></div>
+        <div class="switch ${usingDefault?'on':''}" onclick="toggleDefaultCards()"></div>
+      </div>
+      <div class="default-card-sub">預設字卡與你自行匯入的字卡分開存放。開啟後，夢角回覆會從「自匯入 + 預設」合併池中取詞；預設字卡不可刪除、不佔用你的儲存空間。</div>
+      <div class="default-card-tools">
+        <button class="lib-btn" onclick="previewDefaultCards()">預覽預設字卡</button>
+        <button class="lib-btn" onclick="randomDefaultCards()">隨機看 20 張</button>
+      </div>
+      <div class="lib-count" style="margin-left:0;">目前取詞池：自匯入 ${data.cards.length} + 預設 ${usingDefault?DEFAULT_CARD_BANK.length:0} = ${totalPool} 張</div>
+    </div>
+    <div class="lib-toolbar">
+      <button class="lib-btn" onclick="selectAll('cards')">全選</button>
+      <span class="lib-count">自匯入 ${data.cards.length} 張</span>
+      <button class="lib-btn primary" onclick="importCardsTxt()">匯入檔案</button>
+      <button class="lib-btn" onclick="importCardsPaste()">匯入</button>
+      <button class="lib-btn" onclick="exportCards()">匯出</button>
+      <button class="lib-btn" onclick="dedupeCards()">自動去重</button>
+      <button class="lib-btn" onclick="delSelected('cards')">刪除選中</button>
+    </div>
+    ${data.cards.map((c,i)=>`<div class="lib-item"><input type="checkbox" data-lib="cards" data-i="${i}"><span class="li-text">${esc(c)}</span><button class="lib-del" onclick="delCardItem(${i})">✕</button></div>`).join('')||'<div class="lib-empty">還沒有自匯入字卡</div>'}`;
+  } else if(state.libTab==='kaomoji'){
+    body.innerHTML=`<div class="lib-toolbar">
+      <button class="lib-btn" onclick="selectAll('kaomoji')">全選</button>
+      <span class="lib-count">${data.kaomoji.length} 個</span>
+      <button class="lib-btn primary" onclick="addKaomoji()">＋ 新增</button>
+      <button class="lib-btn" onclick="exportKaomoji()">匯出</button>
+      <button class="lib-btn" onclick="delSelected('kaomoji')">刪除選中</button>
+    </div>
+    ${data.kaomoji.map((k,i)=>`<div class="lib-item"><input type="checkbox" data-lib="kaomoji" data-i="${i}"><span class="li-text">${esc(k)}</span><button class="lib-del" onclick="delKaomojiItem(${i})">✕</button></div>`).join('')||'<div class="lib-empty">還沒有顏文字</div>'}`;
+  } else if(state.libTab==='stickers'){
+    body.innerHTML=`<div class="lib-toolbar">
+      <button class="lib-btn" onclick="selectAll('stickers')">全選</button>
+      <span class="lib-count">${data.stickers.length} 個</span>
+      <button class="lib-btn primary" onclick="importStickers()">新增表情包</button>
+      <button class="lib-btn" onclick="exportStickers()">匯出</button>
+      <button class="lib-btn" onclick="delSelected('stickers')">刪除選中</button>
+    </div>
+    ${data.stickers.map((s,i)=>`<div class="lib-item"><input type="checkbox" data-lib="stickers" data-i="${i}"><img class="lib-thumb" src="${s}"><button class="lib-del" onclick="delStickerItem(${i})">✕</button></div>`).join('')||'<div class="lib-empty">還沒有表情包</div>'}`;
+  } else {
+    const patCount = getPatPool(data).length;
+    body.innerHTML=`<div class="setting-row"><div><div class="setting-label">已讀 / 未讀</div><div class="setting-sub">顯示訊息已讀狀態</div></div><div class="switch ${data.settings.readReceipt?'on':''}" onclick="toggleSetting('readReceipt')"></div></div>
+    <div class="setting-row"><div><div class="setting-label">引用功能</div><div class="setting-sub">夢角約 40% 幾率引用你的話</div></div><div class="switch ${data.settings.quoteEnabled?'on':''}" onclick="toggleSetting('quoteEnabled')"></div></div>
+    <div class="setting-row"><div><div class="setting-label">回覆延時</div><div class="setting-sub">1–120 秒</div></div><input type="range" class="setting-slider" min="1" max="120" value="${data.settings.replyDelay}" oninput="setDelay(this.value)"><span class="setting-val" id="delayVal">${data.settings.replyDelay}s</span></div>
+    <div class="setting-row"><div><div class="setting-label">主動發消息</div><div class="setting-sub">間隔 1–300 秒</div></div><div class="switch ${data.settings.activeMessage?'on':''}" onclick="toggleSetting('activeMessage')"></div></div>
+    <div class="setting-row"><div><div class="setting-label">主動來電</div><div class="setting-sub">約 10%，每 60 秒檢查</div></div><div class="switch ${data.settings.activeCall?'on':''}" onclick="toggleSetting('activeCall')"></div></div>
+    <div class="setting-row"><div><div class="setting-label">正在打字提示</div><div class="setting-sub">回覆前顯示</div></div><div class="switch ${data.settings.typingEnabled?'on':''}" onclick="toggleSetting('typingEnabled')"></div></div>
+    <div class="setting-row"><div><div class="setting-label">顯示夢角頭像</div><div class="setting-sub">打字提示框</div></div><div class="switch ${data.settings.typingAvatar?'on':''}" onclick="toggleSetting('typingAvatar')"></div></div>
+    <div class="setting-row"><div><div class="setting-label">打字提示文字</div><div class="setting-sub">點擊修改</div></div><input class="setting-num" style="width:150px;text-align:left;" value="${esc(data.settings.typingText)}" onchange="setTypingText(this.value)"></div>
+
+    <div class="setting-row" style="margin-top:14px;"><div><div class="setting-label" style="font-weight:600;">拍一拍字卡</div><div class="setting-sub">共 ${patCount} 條，點輸入框旁手形按鈕使用</div></div><button class="lib-btn" onclick="openPatPanel()">管理／使用</button></div>
+    <div class="setting-row"><div><div class="setting-label">夢角也會拍我</div><div class="setting-sub">開啟後夢角可能回拍你</div></div><div class="switch ${data.settings.patBackEnabled?'on':''}" onclick="toggleSetting('patBackEnabled')"></div></div>
+    <div class="setting-row"><div><div class="setting-label">拍一拍概率</div><div class="setting-sub">夢角回拍你的幾率</div></div><input type="range" class="setting-slider" min="0" max="100" value="${data.settings.patBackChance??20}" oninput="setPatChance(this.value)"><span class="setting-val" id="patChanceVal">${data.settings.patBackChance??20}%</span></div>
+
+    <div class="setting-row" style="margin-top:14px;"><div><div class="setting-label" style="font-weight:600;">字卡拼接</div><div class="setting-sub">開啟後夢角會自動拼接字卡</div></div><div class="switch ${data.settings.concatEnabled?'on':''}" onclick="toggleSetting('concatEnabled')"></div></div>
+    <div class="setting-row"><div><div class="setting-label">拼接句數</div><div class="setting-sub">最少 2 句，最多 5 句</div></div><input type="range" class="setting-slider" min="2" max="5" value="${data.settings.concatMax||2}" oninput="setConcatMax(this.value)"><span class="setting-val" id="concatMaxVal">${data.settings.concatMax||2}句</span></div>
+    <div class="setting-row"><div><div class="setting-label">拼接概率</div><div class="setting-sub">觸發拼接的幾率</div></div><input type="range" class="setting-slider" min="0" max="100" value="${data.settings.concatChance??15}" oninput="setConcatChance(this.value)"><span class="setting-val" id="concatChanceVal">${data.settings.concatChance??15}%</span></div>
+
+    <div class="setting-row" style="border-bottom:none;margin-top:10px;"><div><div class="setting-label" style="font-weight:600;">夢角主動寫信</div><div class="setting-sub">開啟後夢角會不定期主動寄信給你</div></div><div class="switch ${data.settings.activeLetter?'on':''}" onclick="toggleSetting('activeLetter')"></div></div>
+    <div class="setting-row" style="border-bottom:none;"><div><div class="setting-label">每次寫信句數（字卡）</div><div class="setting-sub">20–40 句，主動寫信與回信都用此設定</div></div><input type="range" class="setting-slider" min="20" max="40" value="${data.settings.letterSentences||30}" oninput="setLetterSentences(this.value)"><span class="setting-val" id="letterSentVal">${data.settings.letterSentences||30}句</span></div>`;
+  }
+}
+function toggleDefaultCards(){
+  const data=state.data; data.settings.useDefaultCards=!data.settings.useDefaultCards;
+  saveData(state.currentDreamId,data); renderLib();
+  toast(data.settings.useDefaultCards?`已啟用預設字卡（${DEFAULT_CARD_BANK.length} 張）`:'已關閉預設字卡');
+}
+function previewDefaultCards(){
+  state.defaultCardPage=0;
+  openModal(`<h3>預設字卡庫</h3>
+    <div class="modal-label">共 ${DEFAULT_CARD_BANK.length} 張，分類涵蓋日常、撒嬌、關心、想念、誇獎、安慰、告白、俏皮、夜晚、早晨、天氣、吃飯、工作學習、出遊、生病照顧、節日、道歉、吃醋、鼓勵、陪伴、夢境、未來、回憶、小情緒等</div>
+    <div id="defaultPreviewList" style="max-height:50vh;overflow-y:auto;-webkit-overflow-scrolling:touch;"></div>
+    <div class="default-card-more" id="defaultMoreBtn" onclick="moreDefaultCards()">載入更多</div>
+    <div class="modal-actions"><button onclick="closeModal()">關閉</button></div>`);
+  renderDefaultPreview();
+}
+function renderDefaultPreview(){
+  const list=document.getElementById('defaultPreviewList'); if(!list) return;
+  const start=state.defaultCardPage*100;
+  const slice=DEFAULT_CARD_BANK.slice(start,start+100);
+  list.innerHTML = slice.map((c,i)=>`<div class="default-card-item">${start+i+1}. ${esc(c)}</div>`).join('');
+  const btn=document.getElementById('defaultMoreBtn');
+  if(btn) btn.style.display = (start+100 < DEFAULT_CARD_BANK.length) ? 'block' : 'none';
+}
+function moreDefaultCards(){ state.defaultCardPage++; renderDefaultPreview(); }
+function randomDefaultCards(){
+  const picks=[]; const used=new Set();
+  while(picks.length<20){ const i=Math.floor(Math.random()*DEFAULT_CARD_BANK.length); if(!used.has(i)){ used.add(i); picks.push(DEFAULT_CARD_BANK[i]); } }
+  openModal(`<h3>隨機 20 張預設字卡</h3>
+    <div style="max-height:50vh;overflow-y:auto;-webkit-overflow-scrolling:touch;">${picks.map((c,i)=>`<div class="default-card-item">${i+1}. ${esc(c)}</div>`).join('')}</div>
+    <div class="modal-actions"><button onclick="closeModal()">關閉</button></div>`);
+}
+function toggleSetting(key){
+  const data=state.data||getData(state.currentDreamId);
+  data.settings[key]=!data.settings[key];
+  saveData(state.currentDreamId,data);
+  state.data=data;
+  applyTheme(data.settings);
+  renderLib();
+  if(['activeMessage','activeCall','activeLetter'].includes(key)) startTimers();
+  if(key==='activeLetter') startLetterCheck();
+}
+function setDelay(v){ const data=state.data; data.settings.replyDelay=+v; saveData(state.currentDreamId,data); const el=document.getElementById('delayVal'); if(el) el.textContent=v+'s'; }
+function setTypingText(v){ const data=state.data; data.settings.typingText=v||'夢角正在輸入...'; saveData(state.currentDreamId,data); }
+function setLetterSentences(v){ const data=state.data; data.settings.letterSentences=+v; saveData(state.currentDreamId,data); const el=document.getElementById('letterSentVal'); if(el) el.textContent=v+'句'; startLetterCheck(); }
+function setPatChance(v){ const data=state.data; data.settings.patBackChance=+v; saveData(state.currentDreamId,data); const el=document.getElementById('patChanceVal'); if(el) el.textContent=v+'%'; }
+function setConcatMax(v){ const data=state.data; data.settings.concatMax=+v; saveData(state.currentDreamId,data); const el=document.getElementById('concatMaxVal'); if(el) el.textContent=v+'句'; }
+function setConcatChance(v){ const data=state.data; data.settings.concatChance=+v; saveData(state.currentDreamId,data); const el=document.getElementById('concatChanceVal'); if(el) el.textContent=v+'%'; }
+
+function selectAll(kind){ document.querySelectorAll(`input[data-lib="${kind}"]`).forEach(c=>c.checked=true); }
+function delSelected(kind){
+  const data=state.data;
+  const checked=[...document.querySelectorAll(`input[data-lib="${kind}"]:checked`)].map(c=>+c.dataset.i);
+  if(!checked.length){ toast('請先選擇'); return; }
+  const arr = kind==='cards'?data.cards:kind==='kaomoji'?data.kaomoji:data.stickers;
+  const kept = arr.filter((_,i)=>!checked.includes(i));
+  if(kind==='cards') data.cards=kept; else if(kind==='kaomoji') data.kaomoji=kept; else data.stickers=kept;
+  saveData(state.currentDreamId,data); renderLib();
+}
+function delCardItem(i){ state.data.cards.splice(i,1); saveData(state.currentDreamId,state.data); renderLib(); }
+function delKaomojiItem(i){ state.data.kaomoji.splice(i,1); saveData(state.currentDreamId,state.data); renderLib(); }
+function delStickerItem(i){ state.data.stickers.splice(i,1); saveData(state.currentDreamId,state.data); renderLib(); }
+function importCardsTxt(){
+  const f=document.getElementById('hiddenFile'); f.accept='.txt'; f.value='';
+  f.onchange=async()=>{ const file=f.files[0]; if(!file) return; const text=await file.text(); mergeCards(text.split('\n')); };
+  f.click();
+}
+function importCardsPaste(){
+  const t=prompt('粘貼字卡（每行一則）'); if(t) mergeCards(t.split('\n'));
+}
+function mergeCards(lines){
+  const data=state.data;
+  const exist=new Set(data.cards.map(c=>c.trim()));
+  let added=0;
+  lines.forEach(l=>{ const v=l.trim(); if(v&&!exist.has(v)){ data.cards.push(v); exist.add(v); added++; } });
+  saveData(state.currentDreamId,data); renderLib(); toast(`新增 ${added} 張字卡`);
+}
+function exportCards(){
+  const txt=state.data.cards.join('\n');
+  downloadText(txt,'字卡.txt');
+}
+function dedupeCards(){ const data=state.data; data.cards=[...new Set(data.cards.map(c=>c.trim()).filter(Boolean))]; saveData(state.currentDreamId,data); renderLib(); toast('已去重'); }
+function addKaomoji(){
+  const t=prompt('輸入顏文字或 Emoji'); if(t&&t.trim()){ state.data.kaomoji.push(t.trim()); saveData(state.currentDreamId,state.data); renderLib(); }
+}
+function exportKaomoji(){ downloadText(state.data.kaomoji.join('\n'),'顏文字.txt'); }
+
+async function importStickers(){
+  const f=document.getElementById('hiddenFile'); f.accept='image/*'; f.multiple=true; f.value='';
+  f.onchange=async()=>{
+    const files=[...f.files].slice(0,100);
+    if(!files.length) return;
+    const data=state.data; 
+    const exist=new Set(data.stickers);
+    let added=0;
+    toast(`開始上傳 ${files.length} 張圖片...`);
+
+    for(const file of files){ 
+      try {
+        const url=await readFileAsDataURL(file); 
+        if(!exist.has(url)){ 
+          data.stickers.push(url); 
+          exist.add(url); 
+          added++; 
+          saveData(state.currentDreamId,data); 
+        }
+      } catch(e) {
+        console.warn('單張圖片讀取失敗', e);
+      }
+    }
+    renderLib(); 
+    toast(`成功新增 ${added} 個表情包`);
+  };
+  f.click();
+}
+function exportStickers(){ toast('表情包匯出：請長按單個保存（瀏覽器限制）'); }
+function downloadText(text,name){
+  const blob=new Blob([text],{type:'text/plain'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=name; a.click(); URL.revokeObjectURL(a.href);
+}
+
+/* ================= 主题弹窗（含背景图） ================= */
+function openTheme(){
+  const data=state.data||getData(state.currentDreamId);
+  const curTid = THEME_ALIAS[data.settings.themeId] || data.settings.themeId;
+  const hasBg = !!(data.settings.bgImageKey || data.settings.bgImage);
+  let html=`<h3>主題與氣泡</h3>
+  <div class="theme-grid">${THEMES.map(t=>`<div class="theme-swatch ${curTid===t.id?'active':''}" onclick="setTheme('${t.id}')"><div class="theme-dot" style="background:${t.vars['--btn']}"></div>${t.name}</div>`).join('')}</div>
+  <div class="modal-label">字體</div>
+  <div class="font-row">${FONTS.map(f=>`<button class="font-opt ${(data.settings.fontFamily||'system')===f.id?'active':''}" style="font-family:${f.stack}" onclick="setFont('${f.id}')">${f.name}<span class="fo-sample">${f.sample} Aa 123</span></button>`).join('')}</div>
+
+  <div class="modal-label">聊天背景圖</div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;">
+    <button class="lib-btn primary" onclick="pickThemeBg()">導入背景圖</button>
+    <button class="lib-btn" onclick="resetThemeBg()" ${hasBg?'':'disabled style="opacity:.5"'}>恢復預設背景</button>
+  </div>
+  <div style="font-size:11.5px;color:var(--text-sub);margin-top:6px;">${hasBg?'目前已設定背景圖':'目前使用主題預設背景'}</div>
+
+  <div class="modal-label">氣泡形狀</div><div class="shape-row">${[['tail','尖尾'],['round','圓角'],['capsule','膠囊'],['rect','長方形']].map(([v,n])=>`<button class="shape-opt ${data.settings.shape===v?'active':''}" onclick="setShape('${v}')">${n}</button>`).join('')}</div>
+  <div class="modal-label">星星裝飾</div><div class="setting-row"><div class="setting-label">夢角氣泡右上角星星</div><div class="switch ${data.settings.starDeco?'on':''}" onclick="toggleStar()"></div></div>
+  <div class="modal-actions"><button onclick="closeModal()">關閉</button></div>`;
+  openModal(html);
+}
+function pickThemeBg(){
+  const f=document.getElementById('hiddenFile'); f.accept='image/*'; f.value='';
+  f.onchange=async()=>{
+    const file=f.files[0]; if(!file) return;
+    try{
+      const url=await readFileAsDataURL(file);
+      await saveDreamBg(state.currentDreamId,url);
+      await applyChatBackground(state.data.settings);
+      toast('背景圖已更新');
+      openTheme();
+    }catch(e){ console.error(e); toast('儲存失敗，請換小一點的圖片'); }
+  };
+  f.click();
+}
+async function resetThemeBg(){
+  if(!confirm('恢復預設背景？目前背景圖會被清除。')) return;
+  await clearDreamBg(state.currentDreamId);
+  await applyChatBackground(state.data.settings);
+  toast('已恢復預設背景');
+  openTheme();
+}
+function setTheme(id){
+  const data=state.data||getData(state.currentDreamId);
+  data.settings.themeId=id; data.settings.customColors=null;
+  saveData(state.currentDreamId,data); state.data=data;
+  applyTheme(data.settings); openTheme();
+}
+function setFont(id){
+  const data=state.data||getData(state.currentDreamId);
+  data.settings.fontFamily=id;
+  saveData(state.currentDreamId,data); state.data=data;
+  applyTheme(data.settings); openTheme();
+  toast('字體已更新');
+}
+function setShape(v){ const data=state.data; data.settings.shape=v; saveData(state.currentDreamId,data); applyTheme(data.settings); openTheme(); }
+function toggleStar(){ const data=state.data; data.settings.starDeco=!data.settings.starDeco; saveData(state.currentDreamId,data); applyTheme(data.settings); openTheme(); renderMessages(); }
+
+/* ================= 资料管理 ================= */
+function openDataManage(){
+  const data=state.data||getData(state.currentDreamId);
+  openModal(`<h3>資料管理</h3>
+    <div class="modal-label">備份</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
+      <button class="lib-btn" onclick="backup('all')">全部</button>
+      <button class="lib-btn" onclick="backup('chat')">僅聊天</button>
+      <button class="lib-btn" onclick="backup('cards')">僅字卡庫</button>
+    </div>
+    <div class="modal-label">匯入</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
+      <button class="lib-btn" onclick="importBackup('all')">全部</button>
+      <button class="lib-btn" onclick="importBackup('chat')">僅聊天</button>
+      <button class="lib-btn" onclick="importBackup('cards')">僅字卡庫</button>
+    </div>
+    <div class="modal-label">清除</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
+      <button class="lib-btn" onclick="clearChat()">聊天記錄</button>
+      <button class="lib-btn" onclick="clearCards()">字卡庫</button>
+    </div>
+    <div class="modal-actions"><button onclick="closeModal()">關閉</button></div>`);
+}
+function backup(kind){
+  const data=state.data; const dream=getDream(state.currentDreamId);
+  let obj;
+  if(kind==='all') obj={dream,data};
+  else if(kind==='chat') obj={messages:data.messages};
+  else obj={cards:data.cards,kaomoji:data.kaomoji,stickers:data.stickers,patCards:data.settings.patCards};
+  downloadText(JSON.stringify(obj,null,2),`備份_${dream?.name||'夢角'}_${kind}.json`);
+}
+function importBackup(kind){
+  const f=document.getElementById('hiddenFile'); f.accept='.json'; f.value='';
+  f.onchange=async()=>{ const file=f.files[0]; if(!file) return; const text=await file.text(); try{ const obj=JSON.parse(text); if(kind==='all'&&obj.data){ state.data=Object.assign(getData(state.currentDreamId),obj.data); } else if(kind==='chat'&&obj.messages){ state.data.messages=obj.messages; } else if(kind==='cards'){ if(obj.cards) state.data.cards=obj.cards; if(obj.kaomoji) state.data.kaomoji=obj.kaomoji; if(obj.stickers) state.data.stickers=obj.stickers; if(obj.patCards) state.data.settings.patCards=obj.patCards; } saveData(state.currentDreamId,state.data); renderLib(); toast('匯入完成'); }catch(e){ toast('格式錯誤'); } };
+  f.click();
+}
+function clearChat(){ if(!confirm('確定清除聊天記錄？')) return; state.data.messages=[]; saveData(state.currentDreamId,state.data); renderMessages(); toast('已清除'); }
+function clearCards(){ if(!confirm('確定清除自匯入字卡庫？（預設字卡不受影響）')) return; state.data.cards=[]; state.data.kaomoji=[]; state.data.stickers=[]; saveData(state.currentDreamId,state.data); renderLib(); toast('已清除'); }
+
+/* ================= 头像 ================= */
+function pickAvatar(target,dreamId){
+  const f=document.getElementById('hiddenFile'); f.accept='image/*'; f.value='';
+  f.onchange=async()=>{
+    const file=f.files[0]; if(!file) return;
+    try{
+      const url=await readFileAsDataURL(file);
+      if(target==='dream'){
+        await saveDreamAvatar(dreamId,url);
+        await renderHome();
+        if(state.currentDreamId===dreamId) renderAvatar(url,'topDreamAvatar');
+        toast('頭像已更新');
+        closeModal(); openEditDream();
+      } else if(target==='profile'){
+        await saveProfileAvatar(url);
+        renderAvatar(url,'topUserAvatar');
+        toast('頭像已更新');
+        closeModal(); openProfile();
+      }
+    }catch(err){ console.error(err); toast('儲存失敗，請換小一點的圖片'); }
+  };
+  f.click();
+}
+
+/* ================= 弹窗系统 ================= */
+function openModal(html){ const root=document.getElementById('modalRoot'); root.innerHTML=`<div class="overlay" onclick="if(event.target===this)closeModal()"><div class="modal">${html}</div></div>`; }
+function closeModal(){ document.getElementById('modalRoot').innerHTML=''; }
+
+/* ================= 个人资料 ================= */
+async function openProfile(){
+  let avHtml='<span class="ph">👤</span>';
+  if(state.profile.avatar){
+    const url = state.profile.avatar.startsWith('data:') ? state.profile.avatar : await idbGet(state.profile.avatar);
+    if(url) avHtml=`<img src="${url}">`;
+  }
+  openModal(`<h3>個人資料</h3>
+    <div class="profile-avatar-edit" onclick="pickAvatar('profile','')">${avHtml}</div>
+    <div class="avatar-hint">點擊更換頭像</div>
+    <div class="modal-label">名字（全域使用）</div>
+    <input class="modal-input" id="profileName" maxlength="20" value="${esc(state.profile.name||'')}" placeholder="你的名字">
+    <div class="modal-actions"><button onclick="closeModal()">取消</button><button class="primary" onclick="saveProfileName()">儲存</button></div>`);
+}
+function saveProfileName(){
+  const name=document.getElementById('profileName').value.trim()||'訪客';
+  state.profile.name=name; saveProfile();
+  document.getElementById('navAccountName').textContent=name;
+  document.getElementById('topUserName').textContent=name;
+  closeModal(); toast('已儲存');
+}
+
+/* ================= 新增梦角 ================= */
+function openAddDream(){
+  openModal(`<h3>新增夢角</h3>
+    <div class="profile-avatar-edit" onclick="pickAddDreamAvatar()" id="addDreamAvatarBox"><span class="ph">?</span></div>
+    <div class="avatar-hint">點擊上傳頭像（可選）</div>
+    <div class="modal-label">名字</div>
+    <input class="modal-input" id="newDreamName" maxlength="20" placeholder="夢角名字">
+    <div class="modal-actions"><button onclick="closeModal()">取消</button><button class="primary" onclick="createDream()">建立並聊天</button></div>`);
+  window.__newDreamAvatar=null;
+}
+function pickAddDreamAvatar(){
+  const f=document.getElementById('hiddenFile'); f.accept='image/*'; f.value='';
+  f.onchange=async()=>{ const file=f.files[0]; if(!file) return; try{ const url=await readFileAsDataURL(file); window.__newDreamAvatar=url; const box=document.getElementById('addDreamAvatarBox'); box.innerHTML=`<img src="${url}">`; }catch(e){ toast('讀取失敗'); } };
+  f.click();
+}
+async function createDream(){
+  const name=document.getElementById('newDreamName').value.trim();
+  if(!name){ toast('請輸入名字'); return; }
+  const d={id:uid(),name,avatarKey:null};
+  state.dreams.push(d); saveDreams();
+  ensureData(d.id);
+  if(window.__newDreamAvatar){
+    try{ await saveDreamAvatar(d.id,window.__newDreamAvatar); }catch(e){ console.warn(e); }
+  }
+  closeModal(); await renderHome(); openChat(d.id);
+}
+async function openEditDream(){
+  const dream=getDream(state.currentDreamId); if(!dream) return;
+  let avHtml='<span class="ph">?</span>';
+  const av=await loadDreamAvatar(dream.id);
+  if(av) avHtml=`<img src="${av}">`;
+  openModal(`<h3>編輯夢角</h3>
+    <div class="profile-avatar-edit" onclick="pickAvatar('dream','${dream.id}')">${avHtml}</div>
+    <div class="avatar-hint">點擊更換頭像</div>
+    <div class="modal-label">名字</div>
+    <input class="modal-input" id="editDreamName" maxlength="20" value="${esc(dream.name)}">
+    <div class="modal-actions"><button onclick="closeModal()">取消</button><button class="primary" onclick="saveEditDream()">儲存</button></div>`);
+}
+function saveEditDream(){
+  const dream=getDream(state.currentDreamId);
+  dream.name=document.getElementById('editDreamName').value.trim()||dream.name;
+  saveDreams(); closeModal(); renderHome();
+  document.getElementById('navTitle').textContent=`與 ${dream.name} 聊天`;
+  document.getElementById('topDreamName').textContent=dream.name;
+  renderMessages();
+}
+function confirmDeleteDream(id){
+  if(!confirm('刪除該夢角？其聊天、字卡、信件都會一併刪除。')) return;
+  state.dreams=state.dreams.filter(d=>d.id!==id); saveDreams();
+  localStorage.removeItem(dataKey(id));
+  idbDel(idbKey(id,'avatar')).catch(()=>{});
+  idbDel(idbKey(id,'bg')).catch(()=>{});
+  state.letters=state.letters.filter(l=>l.dreamId!==id); saveLetters();
+  closeCtxMenu(); goBack(); renderHome();
+}
+
+/* ================= 上下文菜单 ================= */
+function showCtxMenu(x,y,items){
+  closeCtxMenu();
+  const menu=document.createElement('div'); menu.id='ctxMenu';
+  menu.innerHTML=items.map((it,i)=>`<button data-i="${i}">${it.label}</button>`).join('');
+  menu.style.left=Math.min(x,window.innerWidth-150)+'px'; menu.style.top=Math.min(y,window.innerHeight-160)+'px';
+  document.body.appendChild(menu);
+  menu.querySelectorAll('button').forEach((b,i)=>{ b.onclick=()=>{ const fn=items[i].fn; closeCtxMenu(); fn(); }; });
+}
+function closeCtxMenu(){ const m=document.getElementById('ctxMenu'); if(m) m.remove(); }
+document.addEventListener('click',e=>{ if(!e.target.closest('#ctxMenu')) closeCtxMenu(); if(!e.target.closest('#patPanel') && !e.target.closest('button[title="拍一拍"]')) closePatPanel(); });
+
+/* ================= 导航：返回主页 ================= */
+function goBack(){
+  document.getElementById('pageChat').classList.remove('active');
+  document.getElementById('pageLib').classList.remove('active');
+  document.getElementById('pageHome').classList.add('active');
+  stopTimers();
+  document.getElementById('navBack').classList.add('hidden');
+  renderHome();
+}
+
+/* ================= 表情包选择器 ================= */
+function openStickerPicker(){
+  const data=state.data;
+  if(!data.stickers.length){ toast('表情包庫為空'); return; }
+  openModal(`<h3>選擇表情包</h3><div class="sticker-grid">${data.stickers.map((s,i)=>`<img src="${s}" onclick="sendSticker(${i})">`).join('')}</div>
+    <div class="modal-actions"><button onclick="closeModal()">取消</button></div>`);
+}
+function sendSticker(i){ const s=state.data.stickers[i]; closeModal(); pushMessage({role:'user',type:'sticker',src:s}); scheduleDreamReply(); }
+
+/* ================= 塔罗 ================= */
+const TAROT = [
+  {n:'愚者',u:'新的開始、冒險、純真、無限可能。',r:'衝動、魯莽、逃避責任、缺乏方向。'},
+  {n:'魔術師',u:'創造力、行動力、資源充足、掌握局面。',r:'欺騙、能力不足、計畫落空。'},
+  {n:'女祭司',u:'直覺、內在智慧、神秘、耐心等待。',r:'忽視直覺、隱瞞、情緒壓抑。'},
+  {n:'皇后',u:'豐盛、母性、滋養、感官享受。',r:'過度依賴、停滯、缺乏照顧。'},
+  {n:'皇帝',u:'權威、秩序、穩定、父性保護。',r:'專制、固執、失控。'},
+  {n:'教皇',u:'傳統、信仰、指引、精神導師。',r:'教條、叛逆、錯誤指引。'},
+  {n:'戀人',u:'愛、結合、選擇、和諧。',r:'分離、誘惑、錯誤選擇。'},
+  {n:'戰車',u:'意志力、勝利、前進、掌控。',r:'失控、方向錯誤、挫敗。'},
+  {n:'力量',u:'勇氣、溫柔的堅持、內在力量。',r:'懦弱、自我懷疑、濫用力量。'},
+  {n:'隱者',u:'獨處、內省、尋求真理、指引。',r:'孤立、逃避、迷失。'},
+  {n:'命運之輪',u:'轉機、循環、命運、好運。',r:'厄運、停滯、抗拒改變。'},
+  {n:'正義',u:'公平、真相、因果、平衡。',r:'不公、欺瞞、失衡。'},
+  {n:'吊人',u:'犧牲、等待、換位思考、頓悟。',r:'無謂犧牲、拖延、固執。'},
+  {n:'死神',u:'結束、轉化、重生、放下。',r:'抗拒改變、停滯、恐懼。'},
+  {n:'節制',u:'平衡、調和、耐心、中庸。',r:'失衡、極端、缺乏耐心。'},
+  {n:'惡魔',u:'慾望、束縛、誘惑、物質。',r:'解脫、覺醒、切斷束縛。'},
+  {n:'高塔',u:'突變、崩解、覺醒、破壞重建。',r:'逃避災難、延遲改變、恐懼。'},
+  {n:'星星',u:'希望、療癒、靈感、信心。',r:'失望、缺乏信心、迷惘。'},
+  {n:'月亮',u:'潛意識、不安、幻象、直覺。',r:'釋懷、真相浮現、走出迷霧。'},
+  {n:'太陽',u:'成功、喜悅、活力、光明。',r:'短暫陰霾、過度樂觀、延遲成功。'},
+  {n:'審判',u:'覺醒、召喚、重生、寬恕。',r:'自我懷疑、逃避審視、悔恨。'},
+  {n:'世界',u:'完成、圓滿、整合、旅程終點。',r:'未完成、停滯、缺乏收尾。'},
+];
+let tarotState={count:1,question:'',cards:[]};
+function openTarot(){
+  document.getElementById('tarotRoot').innerHTML=`<div id="tarotLayer">
+    <button class="tarot-close" onclick="closeTarot()">✕</button>
+    <div class="tarot-title">塔羅占卜</div>
+    <div class="tarot-sub">選擇牌陣並提出你的問題</div>
+    <div class="tarot-opts">
+      <button class="tarot-opt active" id="topt1" onclick="setTarotCount(1)">單牌</button>
+      <button class="tarot-opt" id="topt3" onclick="setTarotCount(3)">過去·現在·未來</button>
+    </div>
+    <input class="tarot-input" id="tarotQ" placeholder="你的問題（可選）">
+    <button class="tarot-btn" onclick="drawTarot()">洗牌抽牌</button>
+    <div class="tarot-cards" id="tarotCards"></div>
+    <div class="tarot-results" id="tarotResults"></div>
+  </div>`;
+}
+function closeTarot(){ document.getElementById('tarotRoot').innerHTML=''; }
+function setTarotCount(n){ tarotState.count=n; document.getElementById('topt1').classList.toggle('active',n===1); document.getElementById('topt3').classList.toggle('active',n===3); }
+function drawTarot(){
+  tarotState.question=document.getElementById('tarotQ').value.trim();
+  const pool=[...TAROT].sort(()=>Math.random()-0.5).slice(0,tarotState.count);
+  tarotState.cards=pool.map(t=>({...t,rev:Math.random()<0.5}));
+  const wrap=document.getElementById('tarotCards');
+  wrap.innerHTML=tarotState.cards.map((c,i)=>`<div class="tarot-card-wrap" id="tc${i}" onclick="flipTarot(${i})"><div class="tarot-card-inner">
+    <div class="tarot-face tarot-back"><svg width="30" height="30" viewBox="0 0 24 24" fill="var(--tarot-gold)"><path d="M12 2l2.9 6.6L22 9.3l-5 4.8 1.2 7.1L12 17.8 5.8 21.2 7 14.1 2 9.3l7.1-.7z"/></svg></div>
+    <div class="tarot-face tarot-front">${tarotCardSVG(i)}<div class="tn">${c.n}</div><div class="tr">${c.rev?'逆位':'正位'}</div></div>
+  </div></div>`).join('');
+  setTimeout(()=>tarotState.cards.forEach((_,i)=>flipTarot(i)),600);
+}
+function tarotCardSVG(i){
+  const colors=['#c9a35c','#c98b8b','#7a9a5e','#7a9ab0','#9a7ac8','#d9954a'];
+  const c=colors[i%colors.length];
+  return `<svg viewBox="0 0 60 60" fill="none" stroke="${c}" stroke-width="2"><circle cx="30" cy="30" r="20"/><path d="M30 12v36M12 30h36"/><circle cx="30" cy="30" r="8" fill="${c}" fill-opacity=".2"/></svg>`;
+}
+function flipTarot(i){
+  const el=document.getElementById('tc'+i); if(!el) return;
+  el.classList.add('flipped');
+  setTimeout(()=>renderTarotResults(),400);
+}
+function renderTarotResults(){
+  const positions = tarotState.count===1?['現在']:['過去','現在','未來'];
+  document.getElementById('tarotResults').innerHTML=tarotState.cards.map((c,i)=>`<div class="tarot-result-item">
+    <div class="rt">${c.n} ${c.rev?'（逆位）':'（正位）'}</div>
+    <div class="rp">${positions[i]}</div>
+    <div class="rd">${c.rev?c.r:c.u}</div>
+  </div>`).join('');
+}
+
+/* ================= 写信与收件匣 ================= */
+function startLetterCheck(){
+  if(letterCheckTimer) clearInterval(letterCheckTimer);
+  letterCheckTimer=setInterval(()=>{ checkLetters(false); },60000);
+  checkLetters(false);
+}
+function checkLettersOnHome(){ checkLetters(true); }
+function checkLetters(showToast){
+  loadLetters();
+  let changed=false;
+  const t=now();
+  state.letters.forEach(l=>{
+    if(!l.gotReply&&l.replyAt&&t>=l.replyAt){
+      const data=getData(l.dreamId);
+      const n=data.settings.letterSentences||30;
+      const pool = getReplyPool(data);
+      const cards=pool.length?pool:DEFAULT_CARDS;
+      const lines=[]; for(let i=0;i<n;i++) lines.push(pick(cards));
+      l.replyBody=lines.join('\n');
+      l.gotReply=true; l.repliedAt=t; changed=true;
+    }
+  });
+  if(changed) saveLetters();
+  updateInboxBadge();
+  if(showToast){
+    const unread=state.letters.filter(l=>l.gotReply&&!l.read);
+    if(unread.length){ showLetterToast(unread[0]); }
+  }
+}
+function showLetterToast(letter){
+  const old=document.getElementById('letterToast'); if(old) old.remove();
+  const dream=getDream(letter.dreamId);
+  const el=document.createElement('div'); el.id='letterToast';
+  el.textContent=`${dream?dream.name:'夢角'} 回信了！點擊查看`;
+  el.onclick=()=>{ el.remove(); openLetterDetail(letter.id); };
+  document.body.appendChild(el);
+  setTimeout(()=>el.remove(),8000);
+}
+function openWriteLetter(){
+  loadDreams();
+  if(!state.dreams.length){ toast('請先建立夢角'); return; }
+  openModal(`<h3>寫信</h3>
+    <div class="modal-label">收信夢角</div>
+    <select class="modal-input" id="letterTo">${state.dreams.map(d=>`<option value="${d.id}">${esc(d.name)}</option>`).join('')}</select>
+    <div class="modal-label">信件內容（最多 800 字）</div>
+    <textarea class="modal-input" id="letterBody" rows="6" maxlength="800" placeholder="寫下想說的話..." oninput="document.getElementById('letterCount').textContent=this.value.length+'/800'"></textarea>
+    <div style="text-align:right;font-size:12px;color:var(--text-sub);" id="letterCount">0/800</div>
+    <div class="modal-actions"><button onclick="closeModal()">取消</button><button class="primary" onclick="sendLetter()">寄出</button></div>`);
+}
+function sendLetter(){
+  const dreamId=document.getElementById('letterTo').value;
+  const body=document.getElementById('letterBody').value.trim();
+  if(!body){ toast('請輸入內容'); return; }
+  const dream=getDream(dreamId);
+  const t=now();
+  const letter={id:uid(),dreamId,fromName:state.profile.name||'訪客',toName:dream.name,body,sentAt:t,replyAt:t+randInt(8,12)*3600*1000,replyBody:'',gotReply:false,read:false,repliedAt:null};
+  state.letters.push(letter); saveLetters();
+  closeModal(); updateInboxBadge();
+  toast('已寄出，靜候回信');
+  startLetterCheck();
+}
+function openInbox(){
+  loadLetters();
+  const items=[...state.letters].sort((a,b)=>b.sentAt-a.sentAt);
+  openModal(`<h3>收件匣</h3>
+    ${items.length?items.map(l=>{
+      const dream=getDream(l.dreamId);
+      const status = !l.gotReply?'等待回信中':(l.read?'已讀':'新回信');
+      return `<div class="letter-item" onclick="openLetterDetail('${l.id}')">
+        <div class="li-top"><span class="li-title">${esc(dream?dream.name:'未知')}</span>${l.gotReply&&!l.read?'<span class="letter-unread-dot"></span>':''}</div>
+        <div class="li-preview">${status} · ${esc(l.body.slice(0,30))}</div>
+      </div>`;
+    }).join(''):'<div class="lib-empty">還沒有信件</div>'}
+    <div class="modal-actions"><button onclick="closeModal()">關閉</button></div>`);
+}
+function openLetterDetail(id){
+  loadLetters();
+  const l=state.letters.find(x=>x.id===id); if(!l) return;
+  if(l.gotReply&&!l.read){ l.read=true; saveLetters(); updateInboxBadge(); }
+  const dream=getDream(l.dreamId);
+  const status = !l.gotReply?`等待回信中（預計 ${new Date(l.replyAt).toLocaleString()}）`: (l.read?'已讀':'新回信');
+  openModal(`<h3>信件詳情</h3>
+    <div class="letter-paper">
+      <div class="letter-stamp">夢<br>郵</div>
+      <div class="letter-head">${esc(l.fromName)} → ${esc(l.toName)}</div>
+      <div class="letter-lines">${esc(l.body)}</div>
+    </div>
+    ${l.gotReply?`<div class="letter-paper"><div class="letter-head">${esc(l.toName)} 的回信</div><div class="letter-lines">${esc(l.replyBody)}</div></div>`:`<div style="text-align:center;color:var(--text-sub);font-size:13px;margin-bottom:10px;">${status}</div>`}
+    <div class="modal-actions"><button onclick="closeModal()">關閉</button></div>`);
+}
+
+/* ================= 启动 ================= */
+document.addEventListener('DOMContentLoaded',async ()=>{
+  ensureFirstDream();
+  loadDreams(); loadProfile(); loadLetters();
+  await renderHome();
+  setInterval(()=>checkLetters(false),60000);
+  checkLetters(false);
+});
+
+const msgInput=document.getElementById('msgInput');
+msgInput.addEventListener('input',()=>{ msgInput.style.height='38px'; msgInput.style.height=Math.min(msgInput.scrollHeight,110)+'px'; });
+msgInput.addEventListener('keydown',e=>{ if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); sendText(); } });
+</script>
+</body>
+</html>
